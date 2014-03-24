@@ -1,5 +1,7 @@
 package calculator;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Stack;
 
 public class cal {
@@ -8,10 +10,11 @@ public class cal {
 	private String[] var;								//变量数组，打算MAP实现
 	private int varbit;								//位对应索引 判断该位置VAR数组元素是否使用
 	private enum priority{							//运算符优先级
-		GRE, EQU, LESS
+		GREAT, EQU, LESS
 	}
 	private int varcount;			//当前变量数
 	private String PS1 = ">> ";
+	private Map<String, Integer> trtable;		//存运算符优先级，顺便可以判断是否支持
 	
 	public cal(){
 		init();
@@ -23,23 +26,57 @@ public class cal {
 		optr.push("#");		
 		varbit = 0;
 		varcount = 1;
+		trtable = new  HashMap<String, Integer>();
+		trtable.put("+", 0);
+		trtable.put("-", 0);		
+		trtable.put("*", 1);	
+		trtable.put("/", 1);	
+		trtable.put("^", 2);	
+		trtable.put("mod", 2);
+		trtable.put("sin", 2);
+		trtable.put("cos", 2);
+		trtable.put("tan", 2);
+		trtable.put("arcsin", 2);
+		trtable.put("arccos", 2);
+		trtable.put("arctan", 2);
+		trtable.put("sinh", 2);
+		trtable.put("cosh", 2);
+		trtable.put("tanh", 2);
+		trtable.put("log", 2);
+		trtable.put("log10", 2);
+		trtable.put("ln", 2);
+		trtable.put("pow", 2);
+		trtable.put("exp", 2);
+		trtable.put("fact", 2);
+		trtable.put("sqrt", 2);
+		trtable.put("cuberoot", 2);
+		trtable.put("yroot", 2);
+		trtable.put("avg", 2);
+		trtable.put("sum", 2);
+		trtable.put("var", 2);
+		trtable.put("varp", 2);
+		trtable.put("stdev", 2);
+		trtable.put("stdevp", 2);
+		trtable.put("(", 3);	
+		trtable.put(")", 3);	
+		trtable.put("#", 4);			
 	}
-	void process(String a){}		//处理表达式转成后缀
+	String process(String a){}		//处理表达式返回值
 	String get(){							//返回ans值
 		if( !ans.isEmpty() )
 			return ans;
 		return null;
 	}	
-	priority compare(String tr1, String tr2){}			//比较运算符优先级
-	String cal(String tr, String rd){}						//计算单目运算符
-	String cal(String tr, String rd1,  String rd2){}	//计算双目运算符
-	boolean check(String exp){}							//检查表达式错对
+	priority compare(String tr1, String tr2){}							//比较运算符优先级
+	private String cal(String tr, String rd){}							//计算单目运算符
+	private String cal(String tr, String rd1,  String rd2){}		//计算双目运算符
+	private boolean iscorrect(String exp){}							//检查表达式错对
 	
 //以下是高级后期功能
 	void PS1(String format){}			//改变CONSOLE 每次命令前的提示（比如 "[root /]# "）
-	Boolean save(String path){}		//提供保存变量到文件
-	String load(String path){}			//加载对应变量
-	int getidx(String name){}			//获取变量索引
-	void changevar(int idx){}			//修改变量值
-	String Multcal(String exp){}		//实现同级运算多线程计算。。。。估计不好弄
+	Boolean save(String path){}			//提供保存变量到文件
+	String load(String path){}				//加载对应变量
+	int getidx(String name){}				//获取变量索引
+	void changevar(int idx){}				//修改变量值
+	String Multcal(String exp){}			//实现同级运算多线程计算。。。。估计不好弄
 }
