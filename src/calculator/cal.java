@@ -12,6 +12,7 @@ public class cal {
 	private int varcount;							//当前变量数
 	private String PS1 = ">> ";
 	private Map<String, Integer> trtable;		//存运算符优先级，顺便可以判断是否支持
+	private String exp;
 	
 	public cal(){
 		init();
@@ -56,11 +57,70 @@ public class cal {
 		trtable.put("stdev", 3);
 		trtable.put("stdevp", 3);
 		trtable.put("(", 4);	
-		trtable.put(")", 4);			
+		trtable.put(")", 4);		
 	}
-	String process(){		//处理表达式返回值
-		optr.push("#");	
-		sy
+	String process(String tmp){		//处理表达式返回值
+
+		boolean f_digit;
+		boolean f_change = false;
+		int head = 0, tail = 0;
+		
+		optr.push("#");			
+		exp = tmp + "#";
+
+		if( !iscorrect() )
+			return null;
+		if( exp.charAt(0) <= '9' )
+			f_digit = true;
+		else
+			f_digit = false;
+		for(int i = 0; i < exp.length(); ++i){
+			char c = exp.charAt(i);
+
+			if( c == ' ' || c == '(' )
+				f_change = true;
+			if( !f_change && c == '#' )
+				f_change = true;
+			if( !f_change && c == '[' ){
+				for(int j = i+1; j < exp.length(); ++j)
+					if( exp.charAt(j) == ']' ){
+						head = i + 1;
+						tail = j;
+						i = j + 2;
+						break;
+					}
+				oprd.push( exp.substring(head, tail) );
+				f_digit = true;
+				tail = i;
+			}
+			if( !f_change && c == '^' )
+				f_change = true;
+			if( !f_change && f_digit && ( c < '0'	 || c >= 'A' ) )
+				f_change = true;
+			if( !f_change && !f_digit && c <= '9' )
+				f_change = true;
+
+			if( f_change ){
+				head = tail;
+				tail = i;
+				if( f_digit )
+					oprd.push( exp.substring(head, tail) );
+				else
+					optr.push( exp.substring(head, tail) );
+				if( c == ' ')
+					++tail;
+				f_digit = !f_digit;
+				f_change = false;
+			}
+		}
+		System.out.println("OPRD:");
+		while( !oprd.isEmpty() )
+			System.out.println(oprd.pop());
+		System.out.println("OPTR:");
+		while( !optr.isEmpty() )
+			System.out.println(optr.pop());
+		
+		return null;
 	}
 	void trim(){}				//去多余空格
 	String get(){							//返回ans值
@@ -86,7 +146,10 @@ public class cal {
 	}
 	private String cal(String tr, String rd){}							//计算单目运算符
 	private String cal(String tr, String rd1,  String rd2){}		//计算双目运算符
-	private boolean iscorrect(String exp){}							//检查表达式错对
+	private boolean iscorrect(){											//检查表达式错对
+		
+		return true;
+	}
 	
 //以下是高级后期功能
 	void PS1(String format){}			//改变CONSOLE 每次命令前的提示（比如 "[root /]# "）
