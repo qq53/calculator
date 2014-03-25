@@ -20,7 +20,6 @@ public class cal {
 		oprd = new Stack<String>();
 		optr = new Stack<String>();
 		var = new String[100];
-		optr.push("#");		
 		varbit = 0;
 		varcount = 1;
 		trtable = new  HashMap<String, Integer>();
@@ -30,6 +29,7 @@ public class cal {
 		trtable.put("*", 2);	
 		trtable.put("/", 2);	
 		trtable.put("^", 3);	
+		trtable.put("%", 3);	
 		trtable.put("mod", 3);
 		trtable.put("sin", 3);
 		trtable.put("cos", 3);
@@ -58,7 +58,11 @@ public class cal {
 		trtable.put("(", 4);	
 		trtable.put(")", 4);			
 	}
-	String process(String a){}		//处理表达式返回值
+	String process(){		//处理表达式返回值
+		optr.push("#");	
+		sy
+	}
+	void trim(){}				//去多余空格
 	String get(){							//返回ans值
 		if( !ans.isEmpty() )
 			return ans;
