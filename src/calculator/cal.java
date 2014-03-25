@@ -9,10 +9,7 @@ public class cal {
 	private String ans;								//默认结果存放
 	private String[] var;								//变量数组，打算MAP实现
 	private int varbit;								//位对应索引 判断该位置VAR数组元素是否使用
-	private enum priority{							//运算符优先级
-		GREAT, EQU, LESS
-	}
-	private int varcount;			//当前变量数
+	private int varcount;							//当前变量数
 	private String PS1 = ">> ";
 	private Map<String, Integer> trtable;		//存运算符优先级，顺便可以判断是否支持
 	
@@ -27,39 +24,39 @@ public class cal {
 		varbit = 0;
 		varcount = 1;
 		trtable = new  HashMap<String, Integer>();
-		trtable.put("+", 0);
-		trtable.put("-", 0);		
-		trtable.put("*", 1);	
-		trtable.put("/", 1);	
-		trtable.put("^", 2);	
-		trtable.put("mod", 2);
-		trtable.put("sin", 2);
-		trtable.put("cos", 2);
-		trtable.put("tan", 2);
-		trtable.put("arcsin", 2);
-		trtable.put("arccos", 2);
-		trtable.put("arctan", 2);
-		trtable.put("sinh", 2);
-		trtable.put("cosh", 2);
-		trtable.put("tanh", 2);
-		trtable.put("log", 2);
-		trtable.put("log10", 2);
-		trtable.put("ln", 2);
-		trtable.put("pow", 2);
-		trtable.put("exp", 2);
-		trtable.put("fact", 2);
-		trtable.put("sqrt", 2);
-		trtable.put("cuberoot", 2);
-		trtable.put("yroot", 2);
-		trtable.put("avg", 2);
-		trtable.put("sum", 2);
-		trtable.put("var", 2);
-		trtable.put("varp", 2);
-		trtable.put("stdev", 2);
-		trtable.put("stdevp", 2);
-		trtable.put("(", 3);	
-		trtable.put(")", 3);	
-		trtable.put("#", 4);			
+		trtable.put("#", 0);	
+		trtable.put("+", 1);
+		trtable.put("-", 1);		
+		trtable.put("*", 2);	
+		trtable.put("/", 2);	
+		trtable.put("^", 3);	
+		trtable.put("mod", 3);
+		trtable.put("sin", 3);
+		trtable.put("cos", 3);
+		trtable.put("tan", 3);
+		trtable.put("arcsin", 3);
+		trtable.put("arccos", 3);
+		trtable.put("arctan", 3);
+		trtable.put("sinh", 3);
+		trtable.put("cosh", 3);
+		trtable.put("tanh", 3);
+		trtable.put("log", 3);
+		trtable.put("log10", 3);
+		trtable.put("ln", 3);
+		trtable.put("pow", 3);
+		trtable.put("exp", 3);
+		trtable.put("fact", 3);
+		trtable.put("sqrt", 3);
+		trtable.put("cuberoot", 3);
+		trtable.put("yroot", 3);
+		trtable.put("avg", 3);
+		trtable.put("sum", 3);
+		trtable.put("var", 3);
+		trtable.put("varp", 3);
+		trtable.put("stdev", 3);
+		trtable.put("stdevp", 3);
+		trtable.put("(", 4);	
+		trtable.put(")", 4);			
 	}
 	String process(String a){}		//处理表达式返回值
 	String get(){							//返回ans值
@@ -67,7 +64,22 @@ public class cal {
 			return ans;
 		return null;
 	}	
-	priority compare(String tr1, String tr2){}							//比较运算符优先级
+	char compare(String top, String tr){							//比较运算符优先级
+		int i1 = trtable.get(top);
+		int i2 = trtable.get(tr);
+		if( i1 == i2){
+			if(top.charAt(0) == '#')
+				return '=';
+			if(top.charAt(0) == '('){
+				if(tr.charAt(0) == '(')
+					return '<';
+				if(tr.charAt(0) == ')')
+					return '=';
+			}
+			return '>';
+		}else
+			return i1 > i2?'>':'<';
+	}
 	private String cal(String tr, String rd){}							//计算单目运算符
 	private String cal(String tr, String rd1,  String rd2){}		//计算双目运算符
 	private boolean iscorrect(String exp){}							//检查表达式错对
