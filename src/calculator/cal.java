@@ -13,6 +13,7 @@ public class cal {
 	private String PS1 = ">> ";
 	private Map<String, Integer> trtable;		//存运算符优先级，顺便可以判断是否支持
 	private String exp;
+	private String basetr = "+-*/%^()#,[]";
 	
 	public cal(){
 		init();
@@ -56,63 +57,33 @@ public class cal {
 		trtable.put("varp", 3);
 		trtable.put("stdev", 3);
 		trtable.put("stdevp", 3);
-		trtable.put("(", 4);	
-		trtable.put(")", 4);		
 	}
-	String process(String tmp){		//处理表达式返回值
-
-		boolean f_digit;
-		boolean f_change = false;
+	String process(String tmp){			//处理表达式返回值
 		int head = 0, tail = 0;
+		String c;
 		
 		optr.push("#");			
 		exp = tmp + "#";
 
 		if( !iscorrect() )
 			return null;
-		if( exp.charAt(0) <= '9' )
-			f_digit = true;
-		else
-			f_digit = false;
 		for(int i = 0; i < exp.length(); ++i){
-			char c = exp.charAt(i);
-
-			if( c == ' ' || c == '(' )
-				f_change = true;
-			if( !f_change && c == '#' )
-				f_change = true;
-			if( !f_change && c == '[' ){
-				for(int j = i+1; j < exp.length(); ++j)
-					if( exp.charAt(j) == ']' ){
-						head = i + 1;
-						tail = j;
-						i = j + 2;
-						break;
-					}
-				oprd.push( exp.substring(head, tail) );
-				f_digit = true;
-				tail = i;
-			}
-			if( !f_change && c == '^' )
-				f_change = true;
-			if( !f_change && f_digit && ( c < '0'	 || c >= 'A' ) )
-				f_change = true;
-			if( !f_change && !f_digit && c <= '9' )
-				f_change = true;
-
-			if( f_change ){
+			c = exp.substring(i, i+1);
+			
+			if( basetr.indexOf(c) >= 0 ){
 				head = tail;
-				tail = i;
-				if( f_digit )
-					oprd.push( exp.substring(head, tail) );
-				else
+				tail = i;		
+				if( exp.charAt(head) >= 'a' )
 					optr.push( exp.substring(head, tail) );
-				if( c == ' ')
-					++tail;
-				f_digit = !f_digit;
-				f_change = false;
+				else if ( head != tail )
+					oprd.push( exp.substring(head, tail) );
+				optr.push(c);
+				++tail;
 			}
 		}
+		optr.pop();
+		if( ( c=oprd.pop() ).length() > 0 )
+			oprd.push(c);
 		System.out.println("OPRD:");
 		while( !oprd.isEmpty() )
 			System.out.println(oprd.pop());
@@ -120,10 +91,37 @@ public class cal {
 		while( !optr.isEmpty() )
 			System.out.println(optr.pop());
 		
+		int varsum = 0;
+		c = "#";
+		String tmp, var1, var2;
+		while( optr.peek() != "#" ){
+			if(optr.peek() == "]" || optr.peek() == "[")
+				optr.pop();
+			if(optr.peek() == ","){
+				++varsum;
+				optr.pop();
+			}
+			switch( compare( optr.peek(), c ) ){
+			case '<':
+				tmp = c;
+				c = optr.pop();
+				optr.push(c);
+				break;
+			case '=':
+				optr.pop();
+				c = optr.pop();
+				break;
+			case '>':
+				var1 = oprd.pop();
+				var2 = oprd.pop();
+
+				break;
+			}
+		}
+		
 		return null;
 	}
-	void trim(){}				//去多余空格
-	String get(){							//返回ans值
+	String get(){		//返回ans值
 		if( !ans.isEmpty() )
 			return ans;
 		return null;
@@ -131,15 +129,28 @@ public class cal {
 	char compare(String top, String tr){							//比较运算符优先级
 		int i1 = trtable.get(top);
 		int i2 = trtable.get(tr);
-		if( i1 == i2){
-			if(top.charAt(0) == '#')
+		char c = top.charAt(0);
+		char c1 = tr.charAt(0);
+		
+		if ( c == '(' ){
+			if( c1 == ')' )
 				return '=';
-			if(top.charAt(0) == '('){
-				if(tr.charAt(0) == '(')
-					return '<';
-				if(tr.charAt(0) == ')')
-					return '=';
-			}
+			return '<';
+		}
+		if( c == ')' )
+			return '>';
+		if ( c == '[' ){
+			if( c1 == ']' )
+				return '=';
+			return '<';
+		}
+		if( c == ']' )
+			return '>';	
+		if( i1 == i2 )
+			return '=';
+		if( i1 == i2){
+			if(c == '#')
+				return '=';
 			return '>';
 		}else
 			return i1 > i2?'>':'<';

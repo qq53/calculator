@@ -1,9 +1,6 @@
 package calculator;
 
-import java.text.DecimalFormat;
 import java.util.Scanner;
-import java.util.Stack;
-import java.math.*;
 
 public class console {
 	public static void main(String[] args) {
@@ -12,7 +9,7 @@ public class console {
 		String exp;
 		
 		while( true ){
-			System.out.println("输入表达式:");
+			System.out.println("输入表达式(输quit退出):");
 			exp = sc.nextLine();
 			if( exp.equals("quit") ){
 				System.out.println("Thanks for use !!");
