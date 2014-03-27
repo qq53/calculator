@@ -82,41 +82,57 @@ public class cal {
 			}
 		}
 		optr.pop();
-		if( ( c=oprd.pop() ).length() > 0 )
-			oprd.push(c);
-		System.out.println("OPRD:");
+	/*	System.out.println("OPRD:");
 		while( !oprd.isEmpty() )
 			System.out.println(oprd.pop());
 		System.out.println("OPTR:");
 		while( !optr.isEmpty() )
-			System.out.println(optr.pop());
+			System.out.println(optr.pop());*/
 		
-		int varsum = 0;
-		c = "#";
-		String tmp, var1, var2;
-		while( optr.peek() != "#" ){
-			if(optr.peek() == "]" || optr.peek() == "[")
+		c = optr.pop();
+		String tmp2, var1 ="", var2 ="", ctop;
+		boolean f_vector = false;
+		while( !optr.isEmpty() ){
+			ctop = optr.peek();
+			if(ctop == "]"){
 				optr.pop();
-			if(optr.peek() == ","){
-				++varsum;
-				optr.pop();
+				f_vector = true;
 			}
-			switch( compare( optr.peek(), c ) ){
+			if( ctop == "[" ){
+				optr.pop();
+				var1 += oprd.pop() + ",";
+				f_vector = false;
+			}
+			if(c == ","){
+				optr.pop();
+				if( f_vector )
+					var1 += oprd.pop() + ",";
+				else
+					var2 = oprd.pop();
+			}
+			switch( compare( ctop, c ) ){
 			case '<':
-				tmp = c;
+				tmp2 = c;
 				c = optr.pop();
-				optr.push(c);
-				break;
+				optr.push(tmp2);
+				continue;
 			case '=':
 				optr.pop();
-				c = optr.pop();
 				break;
 			case '>':
-				var1 = oprd.pop();
-				var2 = oprd.pop();
-
+				if( ctop.length() > 1 ){
+					var1 = oprd.pop();
+					if( var.length > 0 )
+						tmp2 = cal(ctop, var1, var2);
+					else
+						tmp2 = cal(ctop, var1);
+					oprd.push(tmp2);
+				}else
+					tmp2 = cal(ctop, oprd.pop(), oprd.pop());
+				oprd.push(tmp2);
 				break;
 			}
+			c = optr.pop();
 		}
 		
 		return null;
@@ -127,8 +143,6 @@ public class cal {
 		return null;
 	}	
 	char compare(String top, String tr){							//比较运算符优先级
-		int i1 = trtable.get(top);
-		int i2 = trtable.get(tr);
 		char c = top.charAt(0);
 		char c1 = tr.charAt(0);
 		
@@ -139,6 +153,13 @@ public class cal {
 		}
 		if( c == ')' )
 			return '>';
+		if ( c1 == ')' ){
+			if( c == '(' )
+				return '=';
+			return '>';
+		}
+		if( c1 == '(' )
+			return '<';
 		if ( c == '[' ){
 			if( c1 == ']' )
 				return '=';
@@ -146,8 +167,16 @@ public class cal {
 		}
 		if( c == ']' )
 			return '>';	
-		if( i1 == i2 )
-			return '=';
+		if ( c1 == ']' ){
+			if( c == '[' )
+				return '=';
+			return '>';
+		}
+		if( c1 == '[' )
+			return '<';	
+		
+		int i1 = trtable.get(top);
+		int i2 = trtable.get(tr);
 		if( i1 == i2){
 			if(c == '#')
 				return '=';
@@ -156,7 +185,10 @@ public class cal {
 			return i1 > i2?'>':'<';
 	}
 	private String cal(String tr, String rd){}							//计算单目运算符
-	private String cal(String tr, String rd1,  String rd2){}		//计算双目运算符
+	private String cal(String tr, String rd2,  String rd1){		//计算双目运算符
+		System.out.println(rd1 + tr + rd2);
+		return null;
+	}
 	private boolean iscorrect(){											//检查表达式错对
 		
 		return true;
