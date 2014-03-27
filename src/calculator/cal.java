@@ -12,8 +12,9 @@ public class cal {
 	private int varcount;							//当前变量数
 	private String PS1 = ">> ";
 	private Map<String, Integer> trtable;		//存运算符优先级，顺便可以判断是否支持
-	private String exp;
-	private String basetr = "+-*/%^()#,[]";
+	private String exp;									//本次完整的表达式
+	private String basetr = "+-*/%^(),[]#";
+	private String exp2;									//待处理的字符串
 	
 	public cal(){
 		init();
@@ -25,7 +26,7 @@ public class cal {
 		varbit = 0;
 		varcount = 1;
 		trtable = new  HashMap<String, Integer>();
-		trtable.put("#", 0);	
+		trtable.put("#", 0);
 		trtable.put("+", 1);
 		trtable.put("-", 1);		
 		trtable.put("*", 2);	
@@ -59,29 +60,63 @@ public class cal {
 		trtable.put("stdevp", 3);
 	}
 	String process(String tmp){			//处理表达式返回值
-		int head = 0, tail = 0;
+		String var1 = "", var2 = "";
+		String ctop, tmp2;
 		String c;
+		int varsum = 1;
 		
+		oprd.clear();
+		optr.clear();
 		optr.push("#");			
 		exp = tmp + "#";
+		exp2 = exp;
 
 		if( !iscorrect() )
 			return null;
-		for(int i = 0; i < exp.length(); ++i){
-			c = exp.substring(i, i+1);
-			
-			if( basetr.indexOf(c) >= 0 ){
-				head = tail;
-				tail = i;		
-				if( exp.charAt(head) >= 'a' )
-					optr.push( exp.substring(head, tail) );
-				else if ( head != tail )
-					oprd.push( exp.substring(head, tail) );
+
+		c = GetNextTr();
+		while( !c.equals("#") || !optr.peek().equals("#") ){
+			ctop = optr.peek();
+			if (c.equals(",")) {
+				++varsum;
+				c = GetNextTr();
+				continue;
+			}
+			switch ( compare( ctop, c ) ) {
+			case '<':
 				optr.push(c);
-				++tail;
+				c = GetNextTr();
+				break;
+			case '=':
+				optr.pop();
+				c = GetNextTr();
+				break;
+			case '>':
+				ctop = optr.pop();
+				if (ctop.length() > 1) {			
+					if( varsum > 2) {
+						while( varsum-- > 0 )
+							var1 += oprd.pop() + ",";
+						tmp2 = cal(ctop, var1);
+					} else if (varsum == 2) {
+						var2 = oprd.pop();
+						var1 = oprd.pop();
+						tmp2 = cal(ctop, var1, var2);
+					} else {
+						var1 = oprd.pop();
+						tmp2 = cal(ctop, var1);		
+					}
+				} else {
+					var2 = oprd.pop();
+					var1 = oprd.pop();
+					tmp2 = cal(ctop, var1, var2);
+				}
+				var1 = "";
+				var2 = "";
+				oprd.push(tmp2);
+				break;
 			}
 		}
-		optr.pop();
 	/*	System.out.println("OPRD:");
 		while( !oprd.isEmpty() )
 			System.out.println(oprd.pop());
@@ -89,53 +124,7 @@ public class cal {
 		while( !optr.isEmpty() )
 			System.out.println(optr.pop());*/
 		
-		c = optr.pop();
-		String tmp2, var1 ="", var2 ="", ctop;
-		boolean f_vector = false;
-		while( !optr.isEmpty() ){
-			ctop = optr.peek();
-			if(ctop == "]"){
-				optr.pop();
-				f_vector = true;
-			}
-			if( ctop == "[" ){
-				optr.pop();
-				var1 += oprd.pop() + ",";
-				f_vector = false;
-			}
-			if(c == ","){
-				optr.pop();
-				if( f_vector )
-					var1 += oprd.pop() + ",";
-				else
-					var2 = oprd.pop();
-			}
-			switch( compare( ctop, c ) ){
-			case '<':
-				tmp2 = c;
-				c = optr.pop();
-				optr.push(tmp2);
-				continue;
-			case '=':
-				optr.pop();
-				break;
-			case '>':
-				if( ctop.length() > 1 ){
-					var1 = oprd.pop();
-					if( var.length > 0 )
-						tmp2 = cal(ctop, var1, var2);
-					else
-						tmp2 = cal(ctop, var1);
-					oprd.push(tmp2);
-				}else
-					tmp2 = cal(ctop, oprd.pop(), oprd.pop());
-				oprd.push(tmp2);
-				break;
-			}
-			c = optr.pop();
-		}
-		
-		return null;
+		return oprd.pop();
 	}
 	String get(){		//返回ans值
 		if( !ans.isEmpty() )
@@ -153,13 +142,13 @@ public class cal {
 		}
 		if( c == ')' )
 			return '>';
+		if( c1 == '(' )
+			return '<';
 		if ( c1 == ')' ){
 			if( c == '(' )
 				return '=';
 			return '>';
 		}
-		if( c1 == '(' )
-			return '<';
 		if ( c == '[' ){
 			if( c1 == ']' )
 				return '=';
@@ -167,33 +156,62 @@ public class cal {
 		}
 		if( c == ']' )
 			return '>';	
+		if( c1 == '[' )
+			return '<';	
 		if ( c1 == ']' ){
 			if( c == '[' )
 				return '=';
 			return '>';
 		}
-		if( c1 == '[' )
-			return '<';	
 		
 		int i1 = trtable.get(top);
 		int i2 = trtable.get(tr);
 		if( i1 == i2){
-			if(c == '#')
+			if( c == '#' )
 				return '=';
 			return '>';
-		}else
+		}
+		else
 			return i1 > i2?'>':'<';
 	}
 	private String cal(String tr, String rd){}							//计算单目运算符
-	private String cal(String tr, String rd2,  String rd1){		//计算双目运算符
+	private String cal(String tr, String rd1,  String rd2){		//计算双目运算符
 		System.out.println(rd1 + tr + rd2);
 		return null;
 	}
 	private boolean iscorrect(){											//检查表达式错对
-		
 		return true;
 	}
-	
+	private String GetNextTr(){
+		int i = 0;
+		String c;
+		String ret = "";
+
+		while( true ){
+			c = exp2.substring(i, i+1);
+			if( basetr.indexOf(c) >= 0 ){
+				if( i > 0 ){
+					if( exp2.charAt( i-1 ) >= 'a' )
+						ret = exp2.substring(0, i);
+					else{
+						oprd.push( exp2.substring(0, i) );
+						ret = c;
+						++i;
+					}
+				}else{
+					ret = c;
+					++i;
+				}
+				exp2 = exp2.substring(i);
+				i = 0;		
+				if( !ret.equals("") )
+					break;
+			}else
+				++i;
+		}
+		
+		return ret;
+}
 //以下是高级后期功能
 	void PS1(String format){}			//改变CONSOLE 每次命令前的提示（比如 "[root /]# "）
 	Boolean save(String path){}			//提供保存变量到文件
