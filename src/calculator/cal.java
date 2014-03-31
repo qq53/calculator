@@ -7,8 +7,8 @@ import java.util.Map;
 import java.util.Stack;
 
 public class cal {
-	private Stack<String> oprd,optr; 		//存放操作数和操作符
-	private String ans;								//默认结果存放
+	private Stack<String> optr, oprd; 		//存放操作符,操作数
+	private BigDecimal ans;								//默认结果存放
 	private String[] var;								//变量数组，打算MAP实现
 	private int varbit;								//位对应索引 判断该位置VAR数组元素是否使用
 	private int varcount;							//当前变量数
@@ -17,8 +17,9 @@ public class cal {
 	private String exp;									//本次完整的表达式
 	private String basetr = "+-*/%^(),[]#";
 	private String exp2;									//待处理的字符串
+	private function func;
 	
-	public cal(){
+	private cal(){
 		init();
 	}
 	
@@ -60,10 +61,13 @@ public class cal {
 		trtable.put("var", 3);
 		trtable.put("varp", 3);
 		trtable.put("stdev", 3);
-		trtable.put("stdevp", 3);
+		trtable.put("stdevp", 3);	
+		
+		func = new function();
+		ans = new BigDecimal("0");
 	}
 
-	String process(String tmp){			//处理表达式返回值
+	public String process(String tmp){			//处理表达式返回值
 		String var1 = "", var2 = "";
 		String ctop, tmp2;
 		String c;
@@ -135,10 +139,8 @@ public class cal {
 		
 		return oprd.pop();
 	}
-	String get(){		//返回ans值
-		if( !ans.isEmpty() )
-			return ans;
-		return null;
+	private String get(){		//返回ans值
+		return ans.toString();
 	}	
 	char compare(String top, String tr){							//比较运算符优先级
 		char c = top.charAt(0);
@@ -185,38 +187,38 @@ public class cal {
 	}
 	private String cal(String tr, String rd){							//计算单目运算符
 		System.out.println(tr + " " + rd);
-		return null;		
+		ans = func.cal(tr, rd);
+		return ans;		
 	}
 	private String cal(String tr, String rd1,  String rd2){		//计算双目运算符
 		System.out.println(rd1 + tr + rd2);
 		BigDecimal brd1 = new BigDecimal(rd1);
 		BigDecimal brd2 = new BigDecimal(rd2);		
-		BigDecimal ret = new BigDecimal("0");		
+
 		if( tr.length() == 1 ){
 			switch( basetr.indexOf(tr) ){
 			case 0:
-				ret = brd1.add(brd2);
+				ans = brd1.add(brd2);
 				break;
 			case 1:
-				ret = brd1.add(brd2.negate());
+				ans = brd1.add(brd2.negate());
 				break;
 			case 2:
-				ret = brd1.multiply(brd2);
+				ans = brd1.multiply(brd2);
 				break;
 			case 3:
-				ret = brd1.divide(brd2, 2, RoundingMode.DOWN);
+				ans = brd1.divide(brd2, 2, RoundingMode.DOWN);
 				break;
 			case 4:
-				ret = brd1.remainder(brd2);
+				ans = brd1.remainder(brd2);
 				break;
 			case 5:
-				ret = brd1.pow(brd2.intValue());
+				ans = brd1.pow(brd2.intValue());
 				break;
 			}
 		}else 
-		switch( tr ){
-		}
-		return ret.toString();
+			ans = func.cal(tr, rd1, rd2);
+		return ans;
 	}
 	private boolean iscorrect(){											//检查表达式错对
 		return true;

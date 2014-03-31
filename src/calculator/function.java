@@ -1,32 +1,39 @@
 package calculator;
 
-public class function {
-	public String sin(String rd){}
-	public String cos(String rd){}
-	public String tan(String rd){}
-	
-	public String arcsin(String rd){}
-	public String arccos(String rd){}
-	public String arctan(String rd){}
-	
-	public String sinh(String rd){}
-	public String cosh(String rd){}
-	public String tanh(String rd){}
-	
-	public String log(String rd, String base){}
-	public String log10(String rd){}
-	public String ln(String rd){}
+import java.math.BigDecimal;
 
-	public String power(String rd1, String rd2){}
-	public String sqrt(String rd){}
-	public String cuberoot(String rd){}
-	public String yroot(String rd, String n){}
-	public String exp(String rd){}
-	public String fact(String rd){}
-	public String avg(String rd){}
-	public String sum(String rd){}
-	public String var(String rd){}
-	public String varp(String rd){}
-	public String stdev(String rd){}
-	public String stdevp(String rd){}
+public class function {
+	String cal(String name, String rd1, String rd2){
+		switch( name ){
+		}
+	}
+	String cal(String name, String rd){}	
+	private String sin(BigDecimal rd){}
+	private String cos(BigDecimal rd){}
+	private String tan(BigDecimal rd){}
+	
+	private String arcsin(BigDecimal rd){}
+	private String arccos(BigDecimal rd){}
+	private String arctan(BigDecimal rd){}
+	
+	private String sinh(BigDecimal rd){}
+	private String cosh(BigDecimal rd){}
+	private String tanh(BigDecimal rd){}
+	
+	private String log(BigDecimal x, BigDecimal base){}
+	private String lg(BigDecimal rd){}
+	private String ln(BigDecimal rd){}
+
+	private String power(BigDecimal x, BigDecimal nPower){}
+	private String sqrt(BigDecimal rd){}
+	private String cuberoot(BigDecimal rd){}
+	private String yroot(BigDecimal rd, BigDecimal n){}
+	private String exp(BigDecimal rd){}
+	private String fact(BigDecimal rd){}
+	private String avg(BigDecimal rd){}
+	private String sum(BigDecimal rd){}
+	private String var(BigDecimal rd){}
+	private String varp(BigDecimal rd){}
+	private String stdev(BigDecimal rd){}
+	private String stdevp(BigDecimal rd){}
 }
