@@ -1,14 +1,6 @@
 package calculator;
 
-//实现各种需要的数学函数
-public class mymath {
-	public String add(String rd1, String rd2){}
-	public String minus(String rd1, String rd2){}
-	public String mul(String rd1, String rd2){}
-	public String div(String rd1, String rd2){}
-	public String mod(String rd1, String rd2){}
-	public String div(String rd1, String rd2){}
-	
+public class function {
 	public String sin(String rd){}
 	public String cos(String rd){}
 	public String tan(String rd){}
@@ -31,7 +23,6 @@ public class mymath {
 	public String yroot(String rd, String n){}
 	public String exp(String rd){}
 	public String fact(String rd){}
-	
 	public String avg(String rd){}
 	public String sum(String rd){}
 	public String var(String rd){}

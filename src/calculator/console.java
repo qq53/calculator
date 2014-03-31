@@ -6,7 +6,7 @@ public class console {
 	public static void main(String[] args) {
 		cal a = new cal();
 		Scanner sc = new Scanner(System.in);
-		String exp;
+		String exp, result;
 		
 		while( true ){
 			System.out.println("输入表达式(输quit退出):");
@@ -15,7 +15,8 @@ public class console {
 				System.out.println("Thanks for use !!");
 				break;
 			}
-			a.process( exp );	
+			result = a.process( exp );	
+			System.out.println(exp + "=" + result);
 		}
 	}
 }

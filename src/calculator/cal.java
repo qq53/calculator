@@ -1,5 +1,7 @@
 package calculator;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
@@ -19,7 +21,8 @@ public class cal {
 	public cal(){
 		init();
 	}
-	public void init(){			//重新初始化环境
+	
+	public void init(){					//重新初始化环境
 		oprd = new Stack<String>();
 		optr = new Stack<String>();
 		var = new String[100];
@@ -44,7 +47,7 @@ public class cal {
 		trtable.put("cosh", 3);
 		trtable.put("tanh", 3);
 		trtable.put("log", 3);
-		trtable.put("log10", 3);
+		trtable.put("lg", 3);
 		trtable.put("ln", 3);
 		trtable.put("pow", 3);
 		trtable.put("exp", 3);
@@ -59,6 +62,7 @@ public class cal {
 		trtable.put("stdev", 3);
 		trtable.put("stdevp", 3);
 	}
+
 	String process(String tmp){			//处理表达式返回值
 		String var1 = "", var2 = "";
 		String ctop, tmp2;
@@ -77,6 +81,10 @@ public class cal {
 		c = GetNextTr();
 		while( !c.equals("#") || !optr.peek().equals("#") ){
 			ctop = optr.peek();
+			if( trtable.get(c) == null && basetr.indexOf(c) < 0 ){
+				System.out.println("函数或操作符错误 !!");
+				return null;
+			}
 			if (c.equals(",")) {
 				++varsum;
 				c = GetNextTr();
@@ -96,7 +104,8 @@ public class cal {
 				if (ctop.length() > 1) {			
 					if( varsum > 2) {
 						while( varsum-- > 0 )
-							var1 += oprd.pop() + ",";
+							var1 = oprd.pop() + "," + var1;
+						var1 = var1.substring(0, var1.length()-1);
 						tmp2 = cal(ctop, var1);
 					} else if (varsum == 2) {
 						var2 = oprd.pop();
@@ -174,10 +183,40 @@ public class cal {
 		else
 			return i1 > i2?'>':'<';
 	}
-	private String cal(String tr, String rd){}							//计算单目运算符
+	private String cal(String tr, String rd){							//计算单目运算符
+		System.out.println(tr + " " + rd);
+		return null;		
+	}
 	private String cal(String tr, String rd1,  String rd2){		//计算双目运算符
 		System.out.println(rd1 + tr + rd2);
-		return null;
+		BigDecimal brd1 = new BigDecimal(rd1);
+		BigDecimal brd2 = new BigDecimal(rd2);		
+		BigDecimal ret = new BigDecimal("0");		
+		if( tr.length() == 1 ){
+			switch( basetr.indexOf(tr) ){
+			case 0:
+				ret = brd1.add(brd2);
+				break;
+			case 1:
+				ret = brd1.add(brd2.negate());
+				break;
+			case 2:
+				ret = brd1.multiply(brd2);
+				break;
+			case 3:
+				ret = brd1.divide(brd2, 2, RoundingMode.DOWN);
+				break;
+			case 4:
+				ret = brd1.remainder(brd2);
+				break;
+			case 5:
+				ret = brd1.pow(brd2.intValue());
+				break;
+			}
+		}else 
+		switch( tr ){
+		}
+		return ret.toString();
 	}
 	private boolean iscorrect(){											//检查表达式错对
 		return true;
