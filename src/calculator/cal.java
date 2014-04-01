@@ -179,6 +179,11 @@ public class cal {
 				return '<';
 			return '>';
 		}
+		if( c == ',' ){		
+			if( c1 == ']' || c1 == ')' )
+				return '=';
+			return '<';
+		}
 		if ( c == '(' ){
 			if( c1 == ')' )
 				return '=';
@@ -189,7 +194,7 @@ public class cal {
 		if( c1 == '(' )
 			return '<';
 		if ( c1 == ')' ){
-			if( c == '(' || c == ',')
+			if( c == '(' )
 				return '=';
 			return '>';
 		}
@@ -203,7 +208,7 @@ public class cal {
 		if( c1 == '[' )
 			return '<';	
 		if ( c1 == ']' ){
-			if( c == '[' || c == ',' )
+			if( c == '[' )
 				return '=';
 			return '>';
 		}
