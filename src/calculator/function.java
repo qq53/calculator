@@ -4,10 +4,13 @@ import java.math.BigDecimal;
 
 public class function {
 	String cal(String name, String rd1, String rd2){
-		switch( name ){
-		}
+		System.out.println(rd1 + name + rd2);
+		return "";
 	}
-	String cal(String name, String rd){}	
+	String cal(String name, String rd){	//处理单变量和向量参数的函数
+		System.out.println(name + " " + rd);
+		return "";
+	}	
 	private String sin(BigDecimal rd){}
 	private String cos(BigDecimal rd){}
 	private String tan(BigDecimal rd){}

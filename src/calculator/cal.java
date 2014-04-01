@@ -8,7 +8,7 @@ import java.util.Stack;
 
 public class cal {
 	private Stack<String> optr, oprd; 		//存放操作符,操作数
-	private BigDecimal ans;								//默认结果存放
+	private String ans;								//默认结果存放
 	private String[] var;								//变量数组，打算MAP实现
 	private int varbit;								//位对应索引 判断该位置VAR数组元素是否使用
 	private int varcount;							//当前变量数
@@ -19,7 +19,7 @@ public class cal {
 	private String exp2;									//待处理的字符串
 	private function func;
 	
-	private cal(){
+	cal(){
 		init();
 	}
 	
@@ -64,7 +64,7 @@ public class cal {
 		trtable.put("stdevp", 3);	
 		
 		func = new function();
-		ans = new BigDecimal("0");
+		ans = "0";
 	}
 
 	public String process(String tmp){			//处理表达式返回值
@@ -110,14 +110,14 @@ public class cal {
 						while( varsum-- > 0 )
 							var1 = oprd.pop() + "," + var1;
 						var1 = var1.substring(0, var1.length()-1);
-						tmp2 = cal(ctop, var1);
+						tmp2 = func.cal(ctop, var1);
 					} else if (varsum == 2) {
 						var2 = oprd.pop();
 						var1 = oprd.pop();
 						tmp2 = cal(ctop, var1, var2);
 					} else {
 						var1 = oprd.pop();
-						tmp2 = cal(ctop, var1);		
+						tmp2 = func.cal(ctop, var1);		
 					}
 				} else {
 					var2 = oprd.pop();
@@ -140,9 +140,9 @@ public class cal {
 		return oprd.pop();
 	}
 	private String get(){		//返回ans值
-		return ans.toString();
+		return ans;
 	}	
-	char compare(String top, String tr){							//比较运算符优先级
+	private char compare(String top, String tr){							//比较运算符优先级
 		char c = top.charAt(0);
 		char c1 = tr.charAt(0);
 		
@@ -185,12 +185,8 @@ public class cal {
 		else
 			return i1 > i2?'>':'<';
 	}
-	private String cal(String tr, String rd){							//计算单目运算符
-		System.out.println(tr + " " + rd);
-		ans = func.cal(tr, rd);
-		return ans;		
-	}
-	private String cal(String tr, String rd1,  String rd2){		//计算双目运算符
+
+	private String cal(String tr, String rd1,  String rd2){		//计算双目运算符,简单的本类处理，复杂的交给function类
 		System.out.println(rd1 + tr + rd2);
 		BigDecimal brd1 = new BigDecimal(rd1);
 		BigDecimal brd2 = new BigDecimal(rd2);		
@@ -198,22 +194,22 @@ public class cal {
 		if( tr.length() == 1 ){
 			switch( basetr.indexOf(tr) ){
 			case 0:
-				ans = brd1.add(brd2);
+				ans = brd1.add(brd2).toString();
 				break;
 			case 1:
-				ans = brd1.add(brd2.negate());
+				ans = brd1.add(brd2.negate()).toString();
 				break;
 			case 2:
-				ans = brd1.multiply(brd2);
+				ans = brd1.multiply(brd2).toString();
 				break;
 			case 3:
-				ans = brd1.divide(brd2, 2, RoundingMode.DOWN);
+				ans = brd1.divide(brd2, 2, RoundingMode.DOWN).toString();
 				break;
 			case 4:
-				ans = brd1.remainder(brd2);
+				ans = brd1.remainder(brd2).toString();
 				break;
 			case 5:
-				ans = brd1.pow(brd2.intValue());
+				ans = brd1.pow(brd2.intValue()).toString();
 				break;
 			}
 		}else 
@@ -254,10 +250,10 @@ public class cal {
 		return ret;
 }
 //以下是高级后期功能
-	void PS1(String format){}			//改变CONSOLE 每次命令前的提示（比如 "[root /]# "）
-	Boolean save(String path){}			//提供保存变量到文件
-	String load(String path){}				//加载对应变量
-	int getidx(String name){}				//获取变量索引
-	void changevar(int idx){}				//修改变量值
-	String Multcal(String exp){}			//实现同级运算多线程计算。。。。估计不好弄
+	public void PS1(String format){}			//改变CONSOLE 每次命令前的提示（比如 "[root /]# "）
+	public boolean save(String path){}			//提供保存变量到文件
+	public String load(String path){}				//加载对应变量
+	private int getidx(String name){}				//获取变量索引
+	private void changevar(int idx){}				//修改变量值
+	private String Multcal(String exp){}			//实现同级运算多线程计算。。。。估计不好弄
 }
