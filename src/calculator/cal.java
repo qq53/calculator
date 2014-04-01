@@ -14,7 +14,6 @@ public class cal {
 	private int varcount;							//当前变量数
 	private String PS1 = ">> ";
 	private Map<String, Integer> trtable;		//存运算符优先级，顺便可以判断是否支持
-	private Map<String, Integer> vartable;		//存运算符优先级，顺便可以判断是否支持	
 	private String exp;									//本次完整的表达式
 	private String basetr = "+-*/%^(),[]#";
 	private String exp2;									//待处理的字符串
@@ -64,27 +63,6 @@ public class cal {
 		trtable.put("stdev", 3);
 		trtable.put("stdevp", 3);	
 		
-		vartable = new  HashMap<String, Integer>();
-		vartable.put("mod", 2);
-		vartable.put("sin", 1);
-		vartable.put("cos", 1);
-		vartable.put("tan", 1);
-		vartable.put("arcsin", 1);
-		vartable.put("arccos", 1);
-		vartable.put("arctan", 1);
-		vartable.put("sinh", 1);
-		vartable.put("cosh", 1);
-		vartable.put("tanh", 1);
-		vartable.put("log", 2);
-		vartable.put("lg", 1);
-		vartable.put("ln", 1);
-		vartable.put("pow", 2);
-		vartable.put("exp", 1);
-		vartable.put("fact", 1);
-		vartable.put("sqrt", 1);
-		vartable.put("cuberoot", 1);
-		vartable.put("yroot", 1);
-		
 		func = new function();
 		ans = "0";
 	}
@@ -131,7 +109,6 @@ public class cal {
 			case '>':
 				ctop = optr.pop();
 				if (ctop.length() > 1) {			
-					//varsum = vartable.get(ctop);
 					if( varsum > 2) {
 						while( varsum-- > 0 )
 							var1 = oprd.pop() + "," + var1;
@@ -225,6 +202,7 @@ public class cal {
 	}
 
 	private String cal(String tr, String rd1,  String rd2){		//计算双目运算符,简单的本类处理，复杂的交给function类
+		System.out.println(rd1 + tr + rd2);
 		BigDecimal brd1 = new BigDecimal(rd1);
 		BigDecimal brd2 = new BigDecimal(rd2);		
 

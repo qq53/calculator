@@ -12,7 +12,7 @@ public class function {
 
 		return "1";
 	}	
-	public String cal(String name, String rd, int varsum){
+	public String cal(String name, String rd, int varsum){		//处理向量函数
 		System.out.println(name + "[" + rd + "]");	
 		
 		return "1";
