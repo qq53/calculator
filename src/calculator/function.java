@@ -3,14 +3,20 @@ package calculator;
 import java.math.BigDecimal;
 
 public class function {
-	String cal(String name, String rd1, String rd2){
+	public String cal(String name, String rd1, String rd2){	//双变量函数
 		System.out.println(rd1 + name + rd2);
-		return "";
+		return "1";
 	}
-	String cal(String name, String rd){	//处理单变量和向量参数的函数
+	public String cal(String name, String rd){	//处理单变量
 		System.out.println(name + " " + rd);
-		return "";
+
+		return "1";
 	}	
+	public String cal(String name, String rd, int varsum){
+		System.out.println(name + "[" + rd + "]");	
+		
+		return "1";
+	}
 	private String sin(BigDecimal rd){}
 	private String cos(BigDecimal rd){}
 	private String tan(BigDecimal rd){}

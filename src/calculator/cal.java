@@ -14,6 +14,7 @@ public class cal {
 	private int varcount;							//当前变量数
 	private String PS1 = ">> ";
 	private Map<String, Integer> trtable;		//存运算符优先级，顺便可以判断是否支持
+	private Map<String, Integer> vartable;		//存运算符优先级，顺便可以判断是否支持	
 	private String exp;									//本次完整的表达式
 	private String basetr = "+-*/%^(),[]#";
 	private String exp2;									//待处理的字符串
@@ -30,11 +31,11 @@ public class cal {
 		varbit = 0;
 		varcount = 1;
 		trtable = new  HashMap<String, Integer>();
-		trtable.put("#", 0);
+		trtable.put("#", 0); 
 		trtable.put("+", 1);
-		trtable.put("-", 1);		
+		trtable.put("-", 1); 
 		trtable.put("*", 2);	
-		trtable.put("/", 2);	
+		trtable.put("/", 2); 
 		trtable.put("^", 3);	
 		trtable.put("%", 3);	
 		trtable.put("mod", 3);
@@ -63,6 +64,27 @@ public class cal {
 		trtable.put("stdev", 3);
 		trtable.put("stdevp", 3);	
 		
+		vartable = new  HashMap<String, Integer>();
+		vartable.put("mod", 2);
+		vartable.put("sin", 1);
+		vartable.put("cos", 1);
+		vartable.put("tan", 1);
+		vartable.put("arcsin", 1);
+		vartable.put("arccos", 1);
+		vartable.put("arctan", 1);
+		vartable.put("sinh", 1);
+		vartable.put("cosh", 1);
+		vartable.put("tanh", 1);
+		vartable.put("log", 2);
+		vartable.put("lg", 1);
+		vartable.put("ln", 1);
+		vartable.put("pow", 2);
+		vartable.put("exp", 1);
+		vartable.put("fact", 1);
+		vartable.put("sqrt", 1);
+		vartable.put("cuberoot", 1);
+		vartable.put("yroot", 1);
+		
 		func = new function();
 		ans = "0";
 	}
@@ -89,28 +111,33 @@ public class cal {
 				System.out.println("函数或操作符错误 !!");
 				return null;
 			}
-			if (c.equals(",")) {
-				++varsum;
-				c = GetNextTr();
-				continue;
-			}
 			switch ( compare( ctop, c ) ) {
+			case ',':
+				c = GetNextTr();
+				break;
 			case '<':
 				optr.push(c);
 				c = GetNextTr();
 				break;
 			case '=':
+				if( optr.peek().equals(",") ){
+					++varsum;
+					optr.pop();
+					break;
+				}
 				optr.pop();
 				c = GetNextTr();
 				break;
 			case '>':
 				ctop = optr.pop();
 				if (ctop.length() > 1) {			
+					//varsum = vartable.get(ctop);
 					if( varsum > 2) {
 						while( varsum-- > 0 )
 							var1 = oprd.pop() + "," + var1;
 						var1 = var1.substring(0, var1.length()-1);
-						tmp2 = func.cal(ctop, var1);
+						tmp2 = func.cal(ctop, var1, varsum);
+						varsum = 1;
 					} else if (varsum == 2) {
 						var2 = oprd.pop();
 						var1 = oprd.pop();
@@ -119,6 +146,7 @@ public class cal {
 						var1 = oprd.pop();
 						tmp2 = func.cal(ctop, var1);		
 					}
+					varsum = 1;
 				} else {
 					var2 = oprd.pop();
 					var1 = oprd.pop();
@@ -145,7 +173,12 @@ public class cal {
 	private char compare(String top, String tr){							//比较运算符优先级
 		char c = top.charAt(0);
 		char c1 = tr.charAt(0);
-		
+
+		if( c1 == ',' ){		
+			if( c == '(' || c == '[' || c == ',' )
+				return '<';
+			return '>';
+		}
 		if ( c == '(' ){
 			if( c1 == ')' )
 				return '=';
@@ -156,7 +189,7 @@ public class cal {
 		if( c1 == '(' )
 			return '<';
 		if ( c1 == ')' ){
-			if( c == '(' )
+			if( c == '(' || c == ',')
 				return '=';
 			return '>';
 		}
@@ -166,11 +199,11 @@ public class cal {
 			return '<';
 		}
 		if( c == ']' )
-			return '>';	
+			return '>';
 		if( c1 == '[' )
 			return '<';	
 		if ( c1 == ']' ){
-			if( c == '[' )
+			if( c == '[' || c == ',' )
 				return '=';
 			return '>';
 		}
@@ -187,7 +220,6 @@ public class cal {
 	}
 
 	private String cal(String tr, String rd1,  String rd2){		//计算双目运算符,简单的本类处理，复杂的交给function类
-		System.out.println(rd1 + tr + rd2);
 		BigDecimal brd1 = new BigDecimal(rd1);
 		BigDecimal brd2 = new BigDecimal(rd2);		
 
