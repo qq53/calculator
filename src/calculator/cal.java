@@ -69,7 +69,7 @@ public class cal {
 
 	public String process(String tmp){			//处理表达式返回值
 		String var1 = "", var2 = "";
-		String ctop, tmp2;
+		String ctop;
 		String c;
 		int varsum = 1;
 		
@@ -90,9 +90,6 @@ public class cal {
 				return null;
 			}
 			switch ( compare( ctop, c ) ) {
-			case ',':
-				c = GetNextTr();
-				break;
 			case '<':
 				optr.push(c);
 				c = GetNextTr();
@@ -110,28 +107,28 @@ public class cal {
 				ctop = optr.pop();
 				if (ctop.length() > 1) {			
 					if( varsum > 2) {
-						while( varsum-- > 0 )
+						int i = varsum;
+						while( i-- > 0 )
 							var1 = oprd.pop() + "," + var1;
-						var1 = var1.substring(0, var1.length()-1);
-						tmp2 = func.cal(ctop, var1, varsum);
+						ans = func.cal(ctop, var1, varsum);
 						varsum = 1;
 					} else if (varsum == 2) {
 						var2 = oprd.pop();
 						var1 = oprd.pop();
-						tmp2 = cal(ctop, var1, var2);
+						ans = cal(ctop, var1, var2);
 					} else {
 						var1 = oprd.pop();
-						tmp2 = func.cal(ctop, var1);		
+						ans = func.cal(ctop, var1);		
 					}
 					varsum = 1;
 				} else {
 					var2 = oprd.pop();
 					var1 = oprd.pop();
-					tmp2 = cal(ctop, var1, var2);
+					ans = cal(ctop, var1, var2);
 				}
 				var1 = "";
 				var2 = "";
-				oprd.push(tmp2);
+				oprd.push(ans);
 				break;
 			}
 		}
@@ -141,8 +138,8 @@ public class cal {
 		System.out.println("OPTR:");
 		while( !optr.isEmpty() )
 			System.out.println(optr.pop());*/
-		
-		return oprd.pop();
+		ans = oprd.pop();
+		return ans;
 	}
 	private String get(){		//返回ans值
 		return ans;
@@ -207,23 +204,23 @@ public class cal {
 		BigDecimal brd2 = new BigDecimal(rd2);		
 
 		if( tr.length() == 1 ){
-			switch( basetr.indexOf(tr) ){
-			case 0:
+			switch( tr ){
+			case "+":
 				ans = brd1.add(brd2).toString();
 				break;
-			case 1:
+			case "-":
 				ans = brd1.add(brd2.negate()).toString();
 				break;
-			case 2:
+			case "*":
 				ans = brd1.multiply(brd2).toString();
 				break;
-			case 3:
+			case "/":
 				ans = brd1.divide(brd2, 2, RoundingMode.DOWN).toString();
 				break;
-			case 4:
+			case "%":
 				ans = brd1.remainder(brd2).toString();
 				break;
-			case 5:
+			case "^":
 				ans = brd1.pow(brd2.intValue()).toString();
 				break;
 			}
