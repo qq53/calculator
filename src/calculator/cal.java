@@ -9,11 +9,9 @@ import java.util.Stack;
 public class cal {
 	private Stack<String> optr, oprd; 		//存放操作符,操作数
 	private String ans;								//默认结果存放
-	private String[] var;								//变量数组，打算MAP实现
-	private int varbit;								//位对应索引 判断该位置VAR数组元素是否使用
-	private int varcount;							//当前变量数
-	private String PS1;
 	private Map<String, Integer> trtable;		//存运算符优先级，顺便可以判断是否支持
+	private String PS1;
+	private Map<String, String> vartable;		//存运算符优先级，顺便可以判断是否支持
 	private String exp;									//本次完整的表达式
 	private String basetr = "+-*/%^(),[]#";
 	private String exp2;									//待处理的字符串
@@ -29,9 +27,7 @@ public class cal {
 	public void init(){					//重新初始化环境
 		oprd = new Stack<String>();
 		optr = new Stack<String>();
-		var = new String[100];
-		varbit = 0;
-		varcount = 1;
+
 		trtable = new  HashMap<String, Integer>();
 		trtable.put("#", 0); 
 		trtable.put("+", 1);
@@ -70,6 +66,8 @@ public class cal {
 		ans = "0";
 		
 		PS1 = "[ " + System.getProperty("user.dir") + " ] ";
+		
+		vartable = new  HashMap<String, String>();
 	}
 
 	public String process(String tmp){			//处理表达式返回值
@@ -81,6 +79,7 @@ public class cal {
 		oprd.clear();
 		optr.clear();
 		optr.push("#");			
+		
 		exp = tmp + "#";
 		exp2 = exp;
 
@@ -88,7 +87,7 @@ public class cal {
 			exp2 = tmp.substring( 5, tmp.length()-2 );
 			PS1( tmp.substring( 5, tmp.length()-2 ) );
 			return tmp;
-		}		
+		}
 		
 		if( !iscorrect() )
 			return null;
@@ -269,7 +268,7 @@ public class cal {
 			}else
 				++i;
 		}
-		
+					
 		return ret;
 }
 //以下是高级后期功能
@@ -278,7 +277,5 @@ public class cal {
 	}
 	public boolean save(String path){}			//提供保存变量到文件
 	public String load(String path){}				//加载对应变量
-	private int getidx(String name){}				//获取变量索引
-	private void changevar(int idx){}				//修改变量值
 	private String Multcal(String exp){}			//实现同级运算多线程计算。。。。估计不好弄
 }
