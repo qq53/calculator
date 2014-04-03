@@ -55,7 +55,7 @@ public class cal {
 		trtable.put("fact", 3);
 		trtable.put("sqrt", 3);
 		trtable.put("cuberoot", 3);
-		trtable.put("yroot", 3);
+		trtable.put("root", 3);
 		trtable.put("avg", 3);
 		trtable.put("sum", 3);
 		trtable.put("var", 3);

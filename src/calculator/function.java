@@ -19,7 +19,7 @@ public class function {
 			brd1 = new BigDecimal(d1);		
 			break;
 		case "pow":
-			if( brd1.toString().indexOf(".") > 0){			
+			if( brd2.toString().indexOf(".") > 0){			
 				d1 = new Double(brd1.doubleValue());
 				d2 = new Double(brd2.doubleValue());	
 				d1 = Math.pow(d1, d2);
@@ -30,6 +30,11 @@ public class function {
 			break;
 		case "mod":
 			brd1 = brd1.remainder(brd2);
+			break;
+		case "root":
+			BigDecimal bone = new BigDecimal("1");
+			bone = bone.divide(brd2, 2, RoundingMode.DOWN);
+			brd1 = new BigDecimal( cal("pow", rd1, bone.toString()) );
 			break;
 		}
 		return brd1.toString();
