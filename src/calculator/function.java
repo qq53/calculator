@@ -1,6 +1,7 @@
 package calculator;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 public class function {
 	public String cal(String name, String rd1, String rd2){	//双变量函数
@@ -101,10 +102,10 @@ public class function {
 	public String cal(String name, String rd, int varsum){		//处理向量函数
 		System.out.println(name + "[" + rd + "]");	
 		BigDecimal bd1 = new BigDecimal("0");
-		BigDecimal bd2 = new BigDecimal("0");;
+		BigDecimal bd2 = new BigDecimal("0");
+		int i;
 		switch( name ){
 		case "sum":
-			int i;
 			for(i = 1; i < rd.length(); ++i){
 				if( rd.charAt(i) == ',' ){
 						bd2 = new BigDecimal(rd.substring(0, i));
@@ -118,6 +119,40 @@ public class function {
 			bd1 = new BigDecimal(cal("sum", rd, varsum));
 			bd2 = new BigDecimal(varsum);
 			bd1 = bd1.divide(bd2);
+			break;
+		case "sumavg":
+			BigDecimal bavg = new BigDecimal( cal("avg",rd,varsum) );		
+			bavg = bavg.negate();
+			for(i = 1; i < rd.length(); ++i){
+				if( rd.charAt(i) == ',' ){
+						bd2 = new BigDecimal(rd.substring(0, i));
+						rd = rd.substring(i+1);
+						i = 0;
+						bd2 = bd2.add(bavg);
+						bd2 = bd2.pow(2);
+						bd1 = bd1.add(bd2);
+				}
+			}
+			break;	
+		case "var":
+			bd1 = new BigDecimal( cal("sumavg",rd,varsum) );
+			bd2 = new BigDecimal( varsum );	
+			BigDecimal bone = new BigDecimal("-1");
+			bd2 = bd2.add(bone);
+			bd1 = bd1.divide(bd2, 2, RoundingMode.DOWN);
+			break;	
+		case "varp":
+			bd1 = new BigDecimal( cal("sumavg",rd,varsum) );
+			bd2 = new BigDecimal( varsum );	
+			bd1 = bd1.divide(bd2, 2, RoundingMode.DOWN);
+			break;	
+		case "stdev":
+			bd1 = new BigDecimal( cal("var",rd,varsum) );
+			bd1 = new BigDecimal( Math.sqrt(bd1.doubleValue()) );
+			break;	
+		case "stdevp":
+			bd1 = new BigDecimal( cal("varp",rd,varsum) );
+			bd1 = new BigDecimal( Math.sqrt(bd1.doubleValue()) );
 			break;
 		}
 		return bd1.toString();
