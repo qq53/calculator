@@ -12,7 +12,7 @@ public class cal {
 	private String[] var;								//变量数组，打算MAP实现
 	private int varbit;								//位对应索引 判断该位置VAR数组元素是否使用
 	private int varcount;							//当前变量数
-	private String PS1 = ">> ";
+	private String PS1;
 	private Map<String, Integer> trtable;		//存运算符优先级，顺便可以判断是否支持
 	private String exp;									//本次完整的表达式
 	private String basetr = "+-*/%^(),[]#";
@@ -23,6 +23,9 @@ public class cal {
 		init();
 	}
 	
+	public void println(String str){
+		System.out.println(PS1 + str);
+	}
 	public void init(){					//重新初始化环境
 		oprd = new Stack<String>();
 		optr = new Stack<String>();
@@ -65,6 +68,8 @@ public class cal {
 		
 		func = new function();
 		ans = "0";
+		
+		PS1 = "[ " + System.getProperty("user.dir") + " ] ";
 	}
 
 	public String process(String tmp){			//处理表达式返回值
@@ -79,6 +84,12 @@ public class cal {
 		exp = tmp + "#";
 		exp2 = exp;
 
+		if( tmp.length() >= 7 && tmp.substring(0, 3).equals("ps1") ){		//因为已经转成小写了
+			exp2 = tmp.substring( 5, tmp.length()-2 );
+			PS1( tmp.substring( 5, tmp.length()-2 ) );
+			return tmp;
+		}		
+		
 		if( !iscorrect() )
 			return null;
 
@@ -86,7 +97,7 @@ public class cal {
 		while( !c.equals("#") || !optr.peek().equals("#") ){
 			ctop = optr.peek();
 			if( trtable.get(c) == null && basetr.indexOf(c) < 0 ){
-				System.out.println("函数或操作符错误 !!");
+				println("函数或操作符错误 !!");
 				return null;
 			}
 			switch ( compare( ctop, c ) ) {
@@ -199,7 +210,7 @@ public class cal {
 	}
 
 	private String cal(String tr, String rd1,  String rd2){		//计算双目运算符,简单的本类处理，复杂的交给function类
-		System.out.println(rd1 + tr + rd2);
+		println(rd1 + tr + rd2);
 		BigDecimal brd1 = new BigDecimal(rd1);
 		BigDecimal brd2 = new BigDecimal(rd2);		
 
@@ -262,7 +273,9 @@ public class cal {
 		return ret;
 }
 //以下是高级后期功能
-	public void PS1(String format){}			//改变CONSOLE 每次命令前的提示（比如 "[root /]# "）
+	public void PS1(String format){			//改变CONSOLE 每次命令前的提示（比如 "[root /]# "）
+		PS1 = format + " ";
+	}
 	public boolean save(String path){}			//提供保存变量到文件
 	public String load(String path){}				//加载对应变量
 	private int getidx(String name){}				//获取变量索引

@@ -9,14 +9,14 @@ public class console {
 		String exp, result;
 		
 		while( true ){
-			System.out.println("输入表达式(输quit退出):");
+			a.println("输入表达式(输quit退出):");
 			exp = sc.nextLine();
 			if( exp.equals("quit") ){
-				System.out.println("Thanks for use !!");
+				a.println("Thanks for use !!");
 				break;
 			}
 			result = a.process( exp );	
-			System.out.println(exp + "=" + result);
+			a.println(exp + "=" + result);
 		}
 	}
 }
