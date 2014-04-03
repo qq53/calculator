@@ -8,15 +8,19 @@ public class console {
 		Scanner sc = new Scanner(System.in);
 		String exp, result;
 		
+		a.println("输入表达式(输quit退出):");
 		while( true ){
-			a.println("输入表达式(输quit退出):");
 			exp = sc.nextLine();
+			a.println("");
 			if( exp.equals("quit") ){
 				a.println("Thanks for use !!");
 				break;
 			}
+			if( exp.length() == 0 )
+				continue;
 			result = a.process( exp );	
 			a.println(exp + "=" + result);
 		}
+		sc.close();
 	}
 }

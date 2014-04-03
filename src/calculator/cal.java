@@ -3,7 +3,10 @@ package calculator;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.Stack;
 
 public class cal {
@@ -68,6 +71,7 @@ public class cal {
 		PS1 = "[ " + System.getProperty("user.dir") + " ] ";
 		
 		vartable = new  HashMap<String, String>();
+		vartable.put("va", "987");
 	}
 
 	public String process(String tmp){			//处理表达式返回值
@@ -81,7 +85,6 @@ public class cal {
 		optr.push("#");			
 		
 		exp = tmp + "#";
-		exp2 = exp;
 
 		if( tmp.length() >= 7 && tmp.substring(0, 3).equals("ps1") ){		//因为已经转成小写了
 			exp2 = tmp.substring( 5, tmp.length()-2 );
@@ -89,6 +92,27 @@ public class cal {
 			return tmp;
 		}
 		
+		if( tmp.length() >= 4 ){
+			exp2 = tmp.substring(0, 4);
+			switch( exp2 ){
+			case "show":
+				Set set = vartable.entrySet() ;
+				Iterator it = vartable.entrySet().iterator();
+				System.out.println("变量表:");
+				while(it.hasNext()){
+					Entry entry = (Entry)it.next();
+					System.out.println(entry.getKey() + " " + entry.getValue());
+				} 
+				break;
+			case "save":
+				break;
+			case "load":
+				break;
+			}
+			//return "";
+		}
+		
+		exp2 = exp;		
 		if( !iscorrect() )
 			return null;
 
@@ -96,7 +120,7 @@ public class cal {
 		while( !c.equals("#") || !optr.peek().equals("#") ){
 			ctop = optr.peek();
 			if( trtable.get(c) == null && basetr.indexOf(c) < 0 ){
-				println("函数或操作符错误 !!");
+				println("函数或操作符错误 !!\n");
 				return null;
 			}
 			switch ( compare( ctop, c ) ) {
