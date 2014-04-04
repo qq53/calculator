@@ -25,7 +25,7 @@ public class cal {
 	}
 	
 	public void println(String str){
-		System.out.println(PS1 + str);
+		System.out.print(PS1 + str);
 	}
 	public void init(){					//重新初始化环境
 		oprd = new Stack<String>();
@@ -68,12 +68,79 @@ public class cal {
 		func = new function();
 		ans = "0";
 		
-		PS1 = "[ " + System.getProperty("user.dir") + " ] ";
+		PS1 = System.getProperty("user.dir");
+		PS1 = PS1.substring( PS1.lastIndexOf("\") + 1 );
+		PS1 = "[ " + PS1 + " ] ";
 		
 		vartable = new  HashMap<String, String>();
-		vartable.put("va", "987");
+		vartable.put("ans", ans);
 	}
 
+private boolean preprocess(){
+	String tmp = exp2.substring(0, exp2.length() - 1 );
+	boolean ret = false;
+		
+	if( tmp.indexOf("=") > 0 ){
+		String var = "", varexp = "";
+		int count = 0;
+		boolean f_print = true;
+		for(String i : tmp.split("=") ){
+			if( count == 2 )
+				break;
+			if( count == 1 )
+				varexp = i;
+			else
+				var = i;
+			++count;
+		}
+		if( var.equals("") || varexp.equals("") )
+			System.out.println("=号使用错误");
+		else{
+			if( !var.equals("ans") ){
+				if( varexp.indexOf(";") > 0 )
+					f_print = false;
+				if( !f_print )
+					varexp = varexp.substring(0, varexp.length()-1 );
+				varexp = process(varexp);
+				BigDecimal btmp = new BigDecimal(varexp);
+				varexp = btmp.toString();
+				vartable.put(var, varexp);
+				if( f_print )
+					System.out.println( var + " = " + vartable.get(var) );
+			}
+		}	
+		ret = true;
+	}
+	
+	if( tmp.length() >= 7 && tmp.substring(0, 3).equals("ps1") ){		//因为已经转成小写了
+		PS1( tmp.substring( 5, tmp.length()-2 ) );
+		ret = true;
+	}
+		
+	if( tmp.length() >= 4 ){
+		switch(  tmp.substring(0, 4) ){
+		case "show":
+			Set set = vartable.entrySet() ;
+			Iterator it = vartable.entrySet().iterator();
+			System.out.println("变量表:");
+			while(it.hasNext()){
+				Entry entry = (Entry)it.next();
+				System.out.println(entry.toString());
+			} 
+			ret = true;
+			break;
+		case "save":
+			ret = true;
+			break;
+		case "load":
+			ret = true;
+			break;
+		}
+	}
+	
+	return ret;
+}
+	
 	public String process(String tmp){			//处理表达式返回值
 		String var1 = "", var2 = "";
 		String ctop;
@@ -85,34 +152,13 @@ public class cal {
 		optr.push("#");			
 		
 		exp = tmp + "#";
+		exp2 = exp;
 
-		if( tmp.length() >= 7 && tmp.substring(0, 3).equals("ps1") ){		//因为已经转成小写了
-			exp2 = tmp.substring( 5, tmp.length()-2 );
-			PS1( tmp.substring( 5, tmp.length()-2 ) );
-			return tmp;
-		}
+		boolean processed = false;
+		processed = preprocess();
 		
-		if( tmp.length() >= 4 ){
-			exp2 = tmp.substring(0, 4);
-			switch( exp2 ){
-			case "show":
-				Set set = vartable.entrySet() ;
-				Iterator it = vartable.entrySet().iterator();
-				System.out.println("变量表:");
-				while(it.hasNext()){
-					Entry entry = (Entry)it.next();
-					System.out.println(entry.getKey() + " " + entry.getValue());
-				} 
-				break;
-			case "save":
-				break;
-			case "load":
-				break;
-			}
-			//return "";
-		}
-		
-		exp2 = exp;		
+		if( processed )
+			return null;
 		if( !iscorrect() )
 			return null;
 
@@ -120,7 +166,7 @@ public class cal {
 		while( !c.equals("#") || !optr.peek().equals("#") ){
 			ctop = optr.peek();
 			if( trtable.get(c) == null && basetr.indexOf(c) < 0 ){
-				println("函数或操作符错误 !!\n");
+				System.out.println("函数或操作符错误 !!");
 				return null;
 			}
 			switch ( compare( ctop, c ) ) {
@@ -233,7 +279,7 @@ public class cal {
 	}
 
 	private String cal(String tr, String rd1,  String rd2){		//计算双目运算符,简单的本类处理，复杂的交给function类
-		println(rd1 + tr + rd2);
+	//	println(rd1 + tr + rd2);
 		BigDecimal brd1 = new BigDecimal(rd1);
 		BigDecimal brd2 = new BigDecimal(rd2);		
 

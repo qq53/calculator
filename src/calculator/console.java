@@ -11,15 +11,17 @@ public class console {
 		a.println("输入表达式(输quit退出):");
 		while( true ){
 			exp = sc.nextLine();
-			a.println("");
 			if( exp.equals("quit") ){
-				a.println("Thanks for use !!");
+				a.println("Thanks for use !!\n");
 				break;
 			}
 			if( exp.length() == 0 )
 				continue;
 			result = a.process( exp );	
-			a.println(exp + "=" + result);
+			if( result != null )
+				a.println(exp + " = " + result + "\n");
+			else
+				a.println("");
 		}
 		sc.close();
 	}

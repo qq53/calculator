@@ -5,7 +5,7 @@ import java.math.RoundingMode;
 
 public class function {
 	public String cal(String name, String rd1, String rd2){	//双变量函数
-		System.out.println(rd1 + name + rd2);
+		//System.out.println(rd1 + name + rd2);
 		BigDecimal brd1 = new BigDecimal(rd1);
 		BigDecimal brd2 = new BigDecimal(rd2);	
 		Double d1, d2;	
@@ -40,7 +40,7 @@ public class function {
 		return brd1.toString();
 	}
 	public String cal(String name, String rd){	//处理单变量
-		System.out.println(name + " " + rd);
+		//System.out.println(name + " " + rd);
 		Double d = new Double(rd);
 		String ret = "";
 		BigDecimal bd1, bd2, bn1;
@@ -105,7 +105,7 @@ public class function {
 		return ret;
 	}	
 	public String cal(String name, String rd, int varsum){		//处理向量函数
-		System.out.println(name + "[" + rd + "]");	
+		//System.out.println(name + "[" + rd + "]");	
 		BigDecimal bd1 = new BigDecimal("0");
 		BigDecimal bd2 = new BigDecimal("0");
 		int i;
