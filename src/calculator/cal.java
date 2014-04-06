@@ -1,5 +1,10 @@
 package calculator;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.HashMap;
@@ -69,14 +74,14 @@ public class cal {
 		ans = "0";
 		
 		PS1 = System.getProperty("user.dir");
-		PS1 = PS1.substring( PS1.lastIndexOf("\") + 1 );
+		PS1 = PS1.substring( PS1.lastIndexOf("\\") + 1 );
 		PS1 = "[ " + PS1 + " ] ";
 		
 		vartable = new  HashMap<String, String>();
 		vartable.put("ans", ans);
 	}
 
-private boolean preprocess(){
+private boolean preprocess() {
 	String tmp = exp2.substring(0, exp2.length() - 1 );
 	boolean ret = false;
 		
@@ -102,8 +107,6 @@ private boolean preprocess(){
 				if( !f_print )
 					varexp = varexp.substring(0, varexp.length()-1 );
 				varexp = process(varexp);
-				BigDecimal btmp = new BigDecimal(varexp);
-				varexp = btmp.toString();
 				vartable.put(var, varexp);
 				if( f_print )
 					System.out.println( var + " = " + vartable.get(var) );
@@ -131,8 +134,16 @@ private boolean preprocess(){
 			break;
 		case "save":
 			ret = true;
+			String[] vararr = tmp.split(" ");
+			if( vararr.length < 3 )
+				break;
+			String spath = vararr[1];
+			String var = tmp.substring(4+1+spath.length()+1);
+			save(spath, var);
 			break;
 		case "load":
+			String lpath = tmp.split(" ")[1];
+			load(lpath);
 			ret = true;
 			break;
 		}
@@ -345,7 +356,37 @@ private boolean preprocess(){
 	public void PS1(String format){			//改变CONSOLE 每次命令前的提示（比如 "[root /]# "）
 		PS1 = format + " ";
 	}
-	public boolean save(String path){}			//提供保存变量到文件
-	public String load(String path){}				//加载对应变量
-	private String Multcal(String exp){}			//实现同级运算多线程计算。。。。估计不好弄
+	public void save(String file, String var){			//提供保存变量到文件 
+		String path = System.getProperty("user.dir") + "\\" + file;
+		try {
+			FileWriter fw = new FileWriter(path);
+			
+			int i = 0;
+			String[] tmp = var.split(" ");
+			while(i < tmp.length){
+				fw.write( tmp[i] + " " + vartable.get(tmp[i]) + "\r\n" );
+				++i;
+			}
+			fw.close();
+		} catch (IOException e) {
+			System.out.println("写文件错误 !!");
+		}
+	}
+	public void load(String path) {				//加载文件变量
+		if( path.indexOf(".") > 0 || path.indexOf("\\") <= 0 )
+			path = System.getProperty("user.dir") + "\\" + path;
+		try {
+			FileReader fr = new FileReader(path);
+			BufferedReader br = new BufferedReader(fr);
+			String tmp;
+			while( (tmp=br.readLine()) != null )
+				vartable.put(tmp.split(" ")[0], tmp.split(" ")[1]);
+			br.close();
+			fr.close();
+		} catch (FileNotFoundException e) {
+			System.out.println("读文件错误 !!");
+		} catch (IOException e) {
+			System.out.println("读文件错误 !!");		
+		}
+	}
 }

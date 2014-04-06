@@ -1,5 +1,6 @@
 package calculator;
 
+import java.io.IOException;
 import java.util.Scanner;
 
 public class console {
@@ -20,8 +21,7 @@ public class console {
 			result = a.process( exp );	
 			if( result != null )
 				a.println(exp + " = " + result + "\n");
-			else
-				a.println("");
+			a.println("");
 		}
 		sc.close();
 	}
