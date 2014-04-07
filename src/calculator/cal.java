@@ -1,6 +1,7 @@
 package calculator;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -24,7 +25,14 @@ public class cal {
 	private String basetr = "+-*/%^(),[]#";
 	private String exp2;									//待处理的字符串
 	private function func;
+	private String pwd;
 	
+	private boolean isExist(String path){
+		File f = new File(path);
+		if( f.exists() )
+			return true;
+		return false;
+	}
 	cal(){
 		init();
 	}
@@ -73,8 +81,8 @@ public class cal {
 		func = new function();
 		ans = "0";
 		
-		PS1 = System.getProperty("user.dir");
-		PS1 = PS1.substring( PS1.lastIndexOf("\\") + 1 );
+		pwd  = System.getProperty("user.dir");
+		PS1 = pwd.substring( pwd.lastIndexOf("\\") + 1 );
 		PS1 = "[ " + PS1 + " ] ";
 		
 		vartable = new  HashMap<String, String>();
@@ -115,6 +123,57 @@ private boolean preprocess() {
 		ret = true;
 	}
 	
+	if( tmp.length() >= 2 ){
+		switch( tmp.substring(0,2) ){
+		case "ls":
+			ret = true;
+			File f = new File(pwd);
+			File list[] = f.listFiles();
+			for(int i = 0; i < list.length; ){
+				System.out.print(list[i].getName() + " ");
+				if( ++i%4 == 0 )
+					System.out.print("\n");
+			}
+			System.out.print("\n");
+			break;
+		case "cd":
+			ret = true;
+			if( tmp.indexOf(":") > 0 ){
+				if( isExist(tmp.substring(3)) )
+					pwd = tmp.substring(3);
+				break;
+			}
+			String tpwd = pwd;
+			String s = tmp.substring(3);
+			if( s.charAt(s.length()-1) != '\\' )
+				s += "\\";
+			while( s.indexOf("\\") > 0 ){
+				switch( s.substring(0, s.indexOf("\\")) ){
+				case ".":
+					break;
+				case "..":
+					if( pwd.lastIndexOf("\\") > 0 )
+						tpwd = tpwd.substring(0, tpwd.lastIndexOf("\\"));
+					break;
+				default:
+					if( s.substring(0, s.indexOf("\\")).indexOf(".") >= 0 )
+						break;
+					tpwd += "\\" + s.substring(0, s.indexOf("\\"));
+					break;
+				}
+				s = s.substring(s.indexOf("\\")+1);
+			}
+			if( !isExist(tpwd) ){
+				System.out.println("目录不存在 !!");
+				break;
+			}
+			pwd = tpwd;
+			PS1 = pwd.substring( pwd.lastIndexOf("\\") + 1 );
+			PS1 = "[ " + PS1 + " ] ";
+			break;
+		}
+	}
+	
 	if( tmp.length() >= 7 && tmp.substring(0, 3).equals("ps1") ){		//因为已经转成小写了
 		PS1( tmp.substring( 5, tmp.length()-2 ) );
 		ret = true;
@@ -130,7 +189,7 @@ private boolean preprocess() {
 				Entry entry = (Entry)it.next();
 				System.out.println(entry.toString());
 			} 
-			ret = true;
+
 			break;
 		case "save":
 			ret = true;
@@ -357,7 +416,7 @@ private boolean preprocess() {
 		PS1 = format + " ";
 	}
 	public void save(String file, String var){			//提供保存变量到文件 
-		String path = System.getProperty("user.dir") + "\\" + file;
+		String path = pwd + "\\" + file;
 		try {
 			FileWriter fw = new FileWriter(path);
 			
@@ -374,7 +433,7 @@ private boolean preprocess() {
 	}
 	public void load(String path) {				//加载文件变量
 		if( path.indexOf(".") > 0 || path.indexOf("\\") <= 0 )
-			path = System.getProperty("user.dir") + "\\" + path;
+			path = pwd + "\\" + path;
 		try {
 			FileReader fr = new FileReader(path);
 			BufferedReader br = new BufferedReader(fr);
