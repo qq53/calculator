@@ -33,8 +33,8 @@ public class function {
 			break;
 		case "root":
 			BigDecimal bone = new BigDecimal("1");
-			bone = bone.divide(brd2, 2, RoundingMode.DOWN);
-			brd1 = new BigDecimal( cal("pow", rd1, bone.toString()) );
+			bone = bone.divide(brd1, 2, RoundingMode.DOWN);
+			brd1 = new BigDecimal( cal("pow", rd2, bone.toString()) );
 			break;
 		}
 		return brd1.toString();

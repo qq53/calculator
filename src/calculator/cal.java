@@ -94,6 +94,7 @@ private boolean preprocess() {
 	boolean ret = false;
 		
 	if( tmp.indexOf("=") > 0 ){
+		ret = true;
 		String var = "", varexp = "";
 		int count = 0;
 		boolean f_print = true;
@@ -109,7 +110,9 @@ private boolean preprocess() {
 		if( var.equals("") || varexp.equals("") )
 			System.out.println("=号使用错误");
 		else{
-			if( !var.equals("ans") ){
+			if( trtable.get(var) != null || var.equals("ans") )
+				System.out.println("变量名不可用 !!");
+			else{
 				if( varexp.indexOf(";") > 0 )
 					f_print = false;
 				if( !f_print )
@@ -120,7 +123,6 @@ private boolean preprocess() {
 					System.out.println( var + " = " + vartable.get(var) );
 			}
 		}	
-		ret = true;
 	}
 	
 	if( tmp.length() >= 2 ){
@@ -130,7 +132,7 @@ private boolean preprocess() {
 			File f = new File(pwd);
 			File list[] = f.listFiles();
 			for(int i = 0; i < list.length; ){
-				System.out.print(list[i].getName() + " ");
+				System.out.printf("%-16s", list[i].getName());
 				if( ++i%4 == 0 )
 					System.out.print("\n");
 			}
@@ -152,7 +154,7 @@ private boolean preprocess() {
 				case ".":
 					break;
 				case "..":
-					if( pwd.lastIndexOf("\\") > 0 )
+					if( tpwd.lastIndexOf("\\") > 0 )
 						tpwd = tpwd.substring(0, tpwd.lastIndexOf("\\"));
 					break;
 				default:
@@ -171,6 +173,51 @@ private boolean preprocess() {
 			PS1 = pwd.substring( pwd.lastIndexOf("\\") + 1 );
 			PS1 = "[ " + PS1 + " ] ";
 			break;
+		case "rm":
+			ret = true;
+			String var = tmp.substring(3);
+			String dpath = pwd, s1 = "";
+			if( var.indexOf(":") > 0 ){
+				if( isExist(var) )
+					dpath = var;
+				else{
+					System.out.println("文件路径错误 !!");
+					break;
+				}
+			}else
+				s1 = var;
+			if( s1.charAt(s1.length()-1) != '\\' )
+				s1 += "\\";
+			while( s1.indexOf("\\") > 0 ){
+				switch( s1.substring(0, s1.indexOf("\\")) ){
+				case ".":
+					break;
+				case "..":
+					if( dpath.lastIndexOf("\\") > 0 )
+						dpath = dpath.substring(0, dpath.lastIndexOf("\\"));
+					break;
+				default:
+					String tmp2 = s1.substring(0, s1.indexOf("\\"));
+					int i = tmp2.indexOf(".");
+					if( i > 0 && tmp2.charAt(i-1) == '.' )
+						break;
+					dpath += "\\" + s1.substring(0, s1.indexOf("\\"));
+					break;
+				}
+				s1 = s1.substring(s1.indexOf("\\")+1);
+			}
+			File df = new File(dpath);
+			if( !df.exists() ){
+				System.out.println("文件不存在 !!");
+				break;
+			}
+			if( df.isDirectory() || !df.isFile() ){
+				System.out.println("文件类型错误 !!");
+				break;
+			}
+			if( !df.delete() )
+				System.out.println("删除文件错误 !!");
+			break;
 		}
 	}
 	
@@ -182,6 +229,7 @@ private boolean preprocess() {
 	if( tmp.length() >= 4 ){
 		switch(  tmp.substring(0, 4) ){
 		case "show":
+			ret = true;
 			Set set = vartable.entrySet() ;
 			Iterator it = vartable.entrySet().iterator();
 			System.out.println("变量表:");
@@ -189,7 +237,6 @@ private boolean preprocess() {
 				Entry entry = (Entry)it.next();
 				System.out.println(entry.toString());
 			} 
-
 			break;
 		case "save":
 			ret = true;
@@ -274,6 +321,11 @@ private boolean preprocess() {
 				} else {
 					var2 = oprd.pop();
 					var1 = oprd.pop();
+					Integer i = new Integer(var2);
+					if( i.intValue() == 0 ){
+						System.out.println("除数不可为0 !!");
+						return null;
+					}
 					ans = cal(ctop, var1, var2);
 				}
 				var1 = "";
