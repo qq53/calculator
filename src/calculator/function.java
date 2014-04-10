@@ -5,7 +5,7 @@ import java.math.RoundingMode;
 
 public class function {
 	public String cal(String name, String rd1, String rd2){	//双变量函数
-		//System.out.println(rd1 + name + rd2);
+//		System.out.println(rd1 + name + rd2);
 		BigDecimal brd1 = new BigDecimal(rd1);
 		BigDecimal brd2 = new BigDecimal(rd2);	
 		Double d1, d2;	
@@ -20,10 +20,14 @@ public class function {
 			break;
 		case "pow":
 			if( brd2.toString().indexOf(".") > 0){			
-				d1 = new Double(brd1.doubleValue());
-				d2 = new Double(brd2.doubleValue());	
+				d1 = new Double(rd1);
+				d2 = new Double(rd2);	
+				if( d1 < 0 && d2 != d2.intValue() ){
+					System.out.println("负数不能小数次方 !!");
+					return null;
+				}
 				d1 = Math.pow(d1, d2);
-				brd1 = new BigDecimal(d1);	
+				brd1 = new BigDecimal( d1.toString() );
 			}
 			else
 				brd1 = brd1.pow( brd2.intValue() );
@@ -32,15 +36,20 @@ public class function {
 			brd1 = brd1.remainder(brd2);
 			break;
 		case "root":
+			Double dtmp = new Double(rd2);
+			if( dtmp < 0 ){
+				System.out.println("根号运算不能负 !!");
+				return null;
+			}
 			BigDecimal bone = new BigDecimal("1");
-			bone = bone.divide(brd1, 2, RoundingMode.DOWN);
+			bone = bone.divide(brd1, 3, RoundingMode.DOWN);
 			brd1 = new BigDecimal( cal("pow", rd2, bone.toString()) );
 			break;
 		}
 		return brd1.toString();
 	}
 	public String cal(String name, String rd){	//处理单变量
-		//System.out.println(name + " " + rd);
+//		System.out.println(name + " " + rd);
 		Double d = new Double(rd);
 		String ret = "";
 		BigDecimal bd1, bd2, bn1;
@@ -105,7 +114,7 @@ public class function {
 		return ret;
 	}	
 	public String cal(String name, String rd, int varsum){		//处理向量函数
-		//System.out.println(name + "[" + rd + "]");	
+//		System.out.println(name + "[" + rd + "]");	
 		BigDecimal bd1 = new BigDecimal("0");
 		BigDecimal bd2 = new BigDecimal("0");
 		int i;
