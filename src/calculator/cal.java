@@ -296,114 +296,70 @@ public class cal {
 	}
 
 	boolean iscorrect() {				//检测表达式
-		int checknumber1 = 0;
-		int checknumber2 = 0;
-		for(int i = 0; exp.charAt(i) != '#'; i++) {
-			if(exp.charAt(i) == '.') {
-				checknumber2++;
-				for(int j = i + 1; exp.charAt(j) != '#'; j++) {
-					if(exp.charAt(j) == '.') {
-						checknumber2++;
-					}
-					if(operator3.indexOf(exp.substring(j, j+1)) < 0 || exp.charAt(j+1) == '#') {
-						checknumber2--;
-						break;		
-					}
-				}
-				if(checknumber2 > 0) {
-					return false;
-				}
-			}
-			checknumber2 = 0;
-		}
-		checknumber2 = 0;
-		for(int i = 0; exp.charAt(i) != '#'; i++) {
-			if(exp.charAt(i) == '(') {
-				checknumber1++;
-			}
-			if(exp.charAt(i) == ')') {
-				checknumber1--;
-			}
-			if(exp.charAt(i) == '[') {
-				checknumber2++;
-			}
-			if(exp.charAt(i) == ']') {
-				checknumber2--;
-			}
-			if(exp.substring(i, i+2).equals("()")) {
-				System.out.println("括号内语句不能为空");
-				return false;
-			}
-			if(exp.substring(i, i+2).equals("[]")) {
-				System.out.println("统计表达式不能为空");
-				return  false;
-			}
-			if(exp.charAt(i) == ',' && exp.charAt(i+1) == ',') {
-				System.out.println("统计表达式不能为空");
-				return false;
-			}
-			if(operator1.indexOf(exp.substring(i, i+1)) >= 0 && operator1.indexOf(exp.substring(i+1, i+2)) >= 0) {
-				System.out.println("操作符个数不合法");
-				return false;
-			}
-			if(exp.charAt(i) == '.' && (operator3.indexOf(exp.substring(i-1, i)) < 0 || operator3.indexOf(exp.substring(i+1, i+2)) < 0)) {
-				System.out.println(".前后有错误");
-				return false;
-			}
-		}
-		for(int i = 0; exp.charAt(i) != '#'; i++) {
-			if(exp.charAt(i) >= 'a' && exp.charAt(i) <= 'z') {
-				int j;
-				int cont1 = 0;
-				int cont2 = 0;
-				for(j = i + 1; exp.charAt(j) >= 'a' && exp.charAt(j) <= 'z'; j++);
-				if(exp.charAt(j) != '(') {
-					System.out.println("函数参数要加（）");
-					return false;
-				}
-				else if(exp.charAt(j) == '(') {
-					if(varnumtable.get(exp.substring(i, j)) == null) {
-						System.out.println("函数名错误");
-						return false;
-					}
-					else {
-						int p, k, m;
-						int n = 1;
-						for(p = j+1; n != 0 && exp.charAt(p) != '#'; p++) {
-							if(exp.charAt(p) == '(')
-								n++;
-							else if(exp.charAt(p) == ')')
-								n--;
-							else if(exp.charAt(p) == ',')
-								cont1++;
-						}
-						for(k = i; k < p; ) {
-							for(m = k; exp.charAt(m) != '#' && exp.charAt(m) >= 'a' && exp.charAt(m) <= 'z'; m++);
-							if(varnumtable.get(exp.substring(k, m)) == null)
-							{
-								k++;
-								continue;
-							}
-							else if(varnumtable.get(exp.substring(k, m)) == 0) {
-								cont1= 0;
-								cont2 = 0;
-								break;
-							}
-							else if(varnumtable.get(exp.substring(k, m)) > 1)
-								cont2++;
-							k = m;
-						}
-						if(cont1 != cont2)
-							return false;
-					}
-				}
-				i = j;
-			}				
-		}
-		if(checknumber1 > 0 || checknumber2 > 0)	{
-			System.out.println("括号个数不合法");
+		exp = "     " + exp + "     ";
+		if( exp.matches(".*\\.\\w+\\..*") ){
+			System.out.println(".号错误 !!");
 			return false;
 		}
+		if( exp.matches(".*[^\\d]+\\.[^\\d]+.*") ){
+			System.out.println(".号错误 !!");
+			return false;
+		}
+		if( exp.matches(".*[\\(\\[]+[\\)\\]]+.*") ){
+			System.out.println("参数不能为空 !!");
+			return false;
+		}
+		if( exp.matches(".*[a-z]+.*") && !exp.matches(".*[a-z]+\\(.*\\).*") ){
+			System.out.println("函数需要参数 !!");
+			return false;
+		}		
+		if( exp.matches("[^\\(]+,[^\\)]+") ){
+			System.out.println("逗号错误 !!");
+			return false;
+		}	
+		if( exp.matches(".*[^\\)\\d]+[+-/%^\\*]+.*") ){
+			System.out.println("数不正确 !!");
+			return false;
+		}		
+		if( exp.matches(".*[+-/%^\\*]+[^a-z\\d]+.*") ){
+			System.out.println("数不正确 !!");
+			return false;
+		}		
+		exp = exp.trim();
+		Set set = varnumtable.entrySet() ;
+		Iterator it = varnumtable.entrySet().iterator();
+		String etmp = exp;
+		while(it.hasNext()){
+			Entry entry = (Entry)it.next();
+			etmp = etmp.replaceAll((String)entry.getKey(), "");
+		}
+		if( etmp.matches(".*[a-z]+.*") ){
+			System.out.println("函数名错误 !!");
+			return false;
+		}
+		int checknumber = 0;
+		for(int i = 0; i < exp.lastIndexOf("#"); ++i) {
+			switch( exp.charAt(i) ){
+			case '(':
+				++checknumber;
+				break;
+			case ')':
+				--checknumber;
+				break;
+			case '[':
+				++checknumber;
+				break;
+			case ']':
+				--checknumber;
+				break;
+			}		
+		}
+		
+		if( checknumber != 0 )	{
+			System.out.println("括号个数不合法 !!");
+			return false;
+		}		
+		
 		return true;
 	}
 	void optimize() { 			//优化表达式
@@ -462,7 +418,7 @@ public class cal {
 				continue;
 			}
 			if(operator2.indexOf(exp.substring(i, i+1)) >= 0) {
-				if((exp.charAt(i+1) == '+' || exp.charAt(i+1) == '-') && operator3.indexOf(exp.substring(i+2, i+3)) > 0) {
+				if((exp.charAt(i+1) == '+' || exp.charAt(i+1) == '-') && operator3.indexOf(exp.substring(i+2, i+3)) >= 0) {
 					int k;
 					for(k = i+3; operator3.indexOf(exp.substring(k, k+1)) > 0; k++);
 					exp = exp.substring(0, i+1) + "(0" + exp.substring(i+1, k) + ")" + exp.substring(k);
@@ -473,7 +429,7 @@ public class cal {
 					int p;
 					int n = 1;
 					for(p = i+2; exp.charAt(p) != '('; p++);
-					for(p += 1 ; n != 0 && exp.charAt(p) != '#'; p++) {
+					for(p += 1 ; n != 0 && p < exp.lastIndexOf("#"); p++) {
 						if(exp.charAt(p) == '(')
 							n++;
 						else if(exp.charAt(p) == ')')
@@ -509,7 +465,7 @@ public class cal {
 							continue;
 						}
 					}
-					else if(operator3.indexOf(exp.substring(i-1, i)) > 0) {
+					else if(operator3.indexOf(exp.substring(i-1, i)) >= 0) {
 						int k;
 						for(k = i-1; operator3.indexOf(exp.substring(k-1, k)) > 0 && exp.charAt(k) != ' '; k--);
 						exp = exp.substring(0, k) + exp.substring(i+1, i+6) + exp.substring(k, i) + "," + exp.substring(i+6);
@@ -529,13 +485,10 @@ public class cal {
 			return null;
 		
 		optimize();
-		if( iscorrect() ) {
+		if( iscorrect() ) 
 			System.out.println("优化后的表达式为:" + exp);
-		}
-		else {
-			System.out.println("表达式错误");
+		else 
 			return null;		
-		}
 		
 		return calcul();
 	}

@@ -15,8 +15,10 @@ public class console {
 				a.println("Thanks for use !!\n");
 				break;
 			}
-			if( exp.length() == 0 )
+			if( exp.replaceAll(" ", "").length() == 0 ){
+				a.println("");
 				continue;
+			}
 			result = a.process( exp );	
 			if( result != null )
 				a.println(exp + " = " + result + "\n");
