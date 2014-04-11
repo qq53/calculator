@@ -25,7 +25,6 @@ public class cal {
 	private String basetr = "+-*/%^(),[]#";
 	private function func;
 	private String pwd;
-	private Map<String, Integer> varnumtable;
 	private String operator1 = ".,+-*/^%";      //判断字符是否为运算符
 	private String operator2 = " ,(^%*/[";        //优化去掉多余的运算符
 	private String operator3 = ".0123456789"; //判断字符是否代表数字
@@ -89,33 +88,6 @@ public class cal {
 		
 		vartable = new  HashMap<String, String>();
 		vartable.put("ans", ans);		
-
-		varnumtable = new HashMap<String, Integer>();
-		varnumtable.put("mod", 2);
-		varnumtable.put("sin", 1);
-		varnumtable.put("cos", 1);
-		varnumtable.put("tan", 1);
-		varnumtable.put("arcsin", 1);
-		varnumtable.put("arccos", 1);
-		varnumtable.put("arctan", 1);
-		varnumtable.put("sinh", 1);
-		varnumtable.put("cosh", 1);
-		varnumtable.put("tanh", 1);
-		varnumtable.put("log", 1);
-		varnumtable.put("lg", 1);
-		varnumtable.put("ln", 1);
-		varnumtable.put("pow", 2);
-		varnumtable.put("exp", 1);
-		varnumtable.put("fact", 1);
-		varnumtable.put("sqrt", 1);
-		varnumtable.put("cuberoot", 1);
-		varnumtable.put("root", 2);
-		varnumtable.put("avg", 0);
-		varnumtable.put("sum", 0);
-		varnumtable.put("var", 0);
-		varnumtable.put("varp", 0);
-		varnumtable.put("stdev", 0);
-		varnumtable.put("stdevp", 0);
 	}
 	private boolean preprocess() {			//预处理 完成变量替换 或 命令
 		String tmp = exp.substring(0, exp.length() - 1 );
@@ -326,12 +298,13 @@ public class cal {
 			return false;
 		}		
 		exp = exp.trim();
-		Set set = varnumtable.entrySet() ;
-		Iterator it = varnumtable.entrySet().iterator();
+		Set set = trtable.entrySet() ;
+		Iterator it = trtable.entrySet().iterator();
 		String etmp = exp;
 		while(it.hasNext()){
 			Entry entry = (Entry)it.next();
-			etmp = etmp.replaceAll((String)entry.getKey(), "");
+			if( ((String)entry.getKey()).length() > 1 )
+				etmp = etmp.replaceAll((String)entry.getKey(), "");
 		}
 		if( etmp.matches(".*[a-z]+.*") ){
 			System.out.println("函数名错误 !!");
@@ -354,11 +327,54 @@ public class cal {
 				break;
 			}		
 		}
-		
 		if( checknumber != 0 )	{
 			System.out.println("括号个数不合法 !!");
 			return false;
 		}		
+		etmp = exp + "     ";
+		int cfunc = 0;	//用来跳过统计函数的,号
+		int pos1 = 0, pos2 = 0; //用来记录统计函数始末
+		for(int i = 0; i < etmp.lastIndexOf("#"); ++i) {
+			String tmp = etmp.substring(i, i+3);
+			if( cfunc !=0 ){
+				if( etmp.charAt(i) == '(' || etmp.charAt(i) == '[' ){
+					++cfunc;
+				}
+				else if( etmp.charAt(i) == ')' || etmp.charAt(i) == ']' ){
+					--cfunc;		
+					if( cfunc == 1 ){
+						if( etmp.charAt(i-1) != ']' ){
+							System.out.println("统计函数需要向量参数 !!");
+							return false;
+						}
+						--cfunc;
+						pos2 = i;
+					}
+				}
+			}
+			if( tmp.equals("avg") || tmp.equals("sum") || tmp.equals("var") || tmp.equals("std") ){
+				pos1 = i;
+				cfunc = 1;
+				i += 2;
+			}
+			if( cfunc == 0 ){
+				if( pos1+pos2 != 0 ){
+					etmp = etmp.substring(0, pos1) + etmp.substring(pos2+1);
+					i = pos1;
+					pos1 = pos2 = 0;
+				}
+				if( tmp.equals("mod") || tmp.equals("pow") || tmp.equals("roo") ){
+					++checknumber;
+					i += 2;
+				}
+				if( etmp.charAt(i) == ',' )
+					--checknumber;
+			}
+		}				
+		if( checknumber != 0 ){
+			System.out.println("函数参数个数错误 !!");
+			return false;
+		}
 		
 		return true;
 	}
