@@ -12,22 +12,47 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.Stack;
 
-public class cal {
+public class calcul {
 	private Stack<String> optr, oprd; 		//存放操作符,操作数
 	private String ans;								//默认结果存放
 	private Map<String, Integer> trtable;		//存运算符优先级，顺便可以判断是否支持
 	private String PS1;
 	private Map<String, String> vartable;		//存运算符优先级，顺便可以判断是否支持
 	private String exp;									//本次完整的表达式
-	private String basetr = "+-*/%^(),[]#";
+	private String basetr = "+-*/%^(),[]#";	//分割之前操作符/数
 	private function func;
 	private String pwd;
-	private String operator1 = ".,+-*/^%";      //判断字符是否为运算符
-	private String operator2 = " ,(^%*/[";        //优化去掉多余的运算符
+	private String operator2 = ",(^%*/[";        //优化去掉多余的运算符
 	private String operator3 = ".0123456789"; //判断字符是否代表数字
+	
+	private String deal_path(String base, String s){
+		s = s.replaceAll(" ", "").replaceAll("/s", " ");
+		if( s.charAt(s.length()-1) != '\\' )	//末尾添加\
+			s += "\\";
+		if( s.indexOf(":") > 0 )
+			if( isExist(s) )
+				return s;
+		String tmp = base;
+		while( s.indexOf("\\") > 0 ){
+			switch( s.substring(0, s.indexOf("\\")) ){
+			case ".":
+				break;
+			case "..":
+				if( tmp.lastIndexOf("\\") > 0 )
+					tmp = tmp.substring(0, tmp.lastIndexOf("\\"));
+				break;
+			default:
+				if( s.substring(0, s.indexOf("\\")).indexOf(".") >= 0 ) // 2个以上.不处理
+					break;
+				tmp += "\\" + s.substring(0, s.indexOf("\\"));
+				break;
+			}
+			s = s.substring(s.indexOf("\\")+1);
+		}
+		return tmp;
+	}
 	
 	private boolean isExist(String path){
 		File f = new File(path);
@@ -35,7 +60,7 @@ public class cal {
 			return true;
 		return false;
 	}
-	cal(){
+	calcul(){
 		init();
 	}
 	public void println(String str){
@@ -90,11 +115,37 @@ public class cal {
 		vartable.put("ans", ans);		
 	}
 	private boolean preprocess() {			//预处理 完成变量替换 或 命令
-		String tmp = exp.substring(0, exp.length() - 1 );
+		String tmp = exp.substring(0, exp.length() - 1 ).trim();
 		tmp = tmp.replaceAll(" {2,}", " ");
 		boolean ret = false;
+		Iterator<Entry<String, String>> it;
+		Entry<String, String> entry;
+		
+		if( tmp.indexOf("=") != tmp.lastIndexOf("=") ){
+			System.out.println("=号超过2个 !!");
+			return true;
+		}
+		//变量替换
+		tmp = "     " + tmp + "     ";
+		int pos = tmp.lastIndexOf("=");
+		if( pos < 0 )
+			pos = 0;
+		it = vartable.entrySet().iterator();
+		while(it.hasNext()){
+			entry = (Entry<String, String>)it.next();
+			int i = tmp.indexOf(entry.getKey());
+			if( i > pos ){
+				int len  = entry.getKey().length();
+				int j = ( tmp.charAt(i) + tmp.charAt( i + len) )>>1;
+				if(  j < 'a' || j > 'z' )
+					tmp = tmp.substring(0, i) + entry.getValue() + tmp.substring(i+len);
+			}
+		} 
+		tmp = tmp.trim();		
+		exp = tmp + "#";		//替换后的
 		
 		if( tmp.indexOf("=") > 0 ){
+			tmp = tmp.replaceAll(" ", "");	//=号表达式 不需要空格
 			ret = true;
 			String var = "", varexp = "";
 			int count = 0;
@@ -111,7 +162,7 @@ public class cal {
 			if( var.equals("") || varexp.equals("") )
 				System.out.println("=号使用错误");
 			else{
-				if( trtable.get(var) != null || var.equals("ans") )
+				if( trtable.get(var) != null || var.equals("ans") || var.matches(".*\\d+.*") )
 					System.out.println("变量名不可用 !!");
 				else{
 					if( varexp.indexOf(";") > 0 )
@@ -121,15 +172,12 @@ public class cal {
 					exp = varexp + "#";
 					optimize();
 					if( iscorrect() ) {
-						System.out.println("优化后的表达式为:" + exp);
-						varexp = calcul();
+						varexp = cal();
 						vartable.put(var, varexp);
 						if( f_print )
 							System.out.println( var + " = " + vartable.get(var) );
-					}
-					else {
-						System.out.println("表达式错误");
-					}
+					}else
+						return true;
 				}
 			}	
 		}
@@ -138,94 +186,59 @@ public class cal {
 			switch( tmp.substring(0,2) ){
 			case "ls":
 				ret = true;
-				File f = new File(pwd);
+				File f = new File(pwd + "\\");
 				File list[] = f.listFiles();
-				for(int i = 0; i < list.length; ){
-					System.out.printf("%-16s", list[i].getName());
+				int i;
+				for(i = 0; i < list.length; ){
+					System.out.printf("%-15s ", list[i].getName());
 					if( ++i%4 == 0 )
 						System.out.print("\n");
 				}
-				System.out.print("\n");
+				if( i%4 != 0)
+					System.out.print("\n");
 				break;
 			case "cd":
 				ret = true;
-				if( tmp.indexOf(":") > 0 ){
-					if( isExist(tmp.substring(3)) )
-						pwd = tmp.substring(3);
-					break;
+				if( tmp.charAt(2) != ' ' && tmp.length() < 4 ){
+					System.out.println("cd参数错误!! ");
+					return true;
 				}
-				String tpwd = pwd;
 				String s = tmp.substring(3);
-				if( s.charAt(s.length()-1) != '\\' )	//末尾添加\
-					s += "\\";
-				while( s.indexOf("\\") > 0 ){
-					switch( s.substring(0, s.indexOf("\\")) ){
-					case ".":
-						break;
-					case "..":
-						if( tpwd.lastIndexOf("\\") > 0 )
-							tpwd = tpwd.substring(0, tpwd.lastIndexOf("\\"));
-						break;
-					default:
-						if( s.substring(0, s.indexOf("\\")).indexOf(".") >= 0 ) // 2个以上.不处理
-							break;
-						tpwd += "\\" + s.substring(0, s.indexOf("\\"));
-						break;
-					}
-					s = s.substring(s.indexOf("\\")+1);
-				}
+				String tpwd = deal_path(pwd, s);
 				if( !isExist(tpwd) ){
 					System.out.println("目录不存在 !!");
 					break;
 				}
 				pwd = tpwd;
-				PS1 = pwd.substring( pwd.lastIndexOf("\\") + 1 );
+				if( pwd.lastIndexOf("\\") > 0 )
+					PS1 = pwd.substring( pwd.lastIndexOf("\\") + 1 );
+				else
+					PS1 = pwd.substring(0, 1);
 				PS1 = "[ " + PS1 + " ] ";
 				break;
 			case "rm":
 				ret = true;
-				String var = tmp.substring(3);
-				String dpath = pwd, s1 = "";
-				if( var.indexOf(":") > 0 ){
-					if( isExist(var) )
-						dpath = var;
-					else{
-						System.out.println("文件路径错误 !!");
+				if( tmp.charAt(2) != ' ' ){
+					System.out.println("需要参数 !!");
+					return true;
+				}
+				String[] vararr = tmp.substring(3).split(" ");
+				for(i = 0; i < vararr.length; ++i){
+					String dpath = deal_path(pwd, vararr[i]);
+					File df = new File(dpath);
+					if( !df.exists() ){
+						System.out.println("文件不存在 !!");
 						break;
 					}
-				}else
-					s1 = var;
-				if( s1.charAt(s1.length()-1) != '\\' )
-					s1 += "\\";
-				while( s1.indexOf("\\") > 0 ){
-					switch( s1.substring(0, s1.indexOf("\\")) ){
-					case ".":
-						break;
-					case "..":
-						if( dpath.lastIndexOf("\\") > 0 )
-							dpath = dpath.substring(0, dpath.lastIndexOf("\\"));
-						break;
-					default:
-						String tmp2 = s1.substring(0, s1.indexOf("\\"));
-						int i = tmp2.indexOf(".");
-						if( i > 0 && tmp2.charAt(i-1) == '.' )
-							break;
-						dpath += "\\" + s1.substring(0, s1.indexOf("\\"));
+					if( df.isDirectory() || !df.isFile() ){
+						System.out.println("文件类型错误 !!");
 						break;
 					}
-					s1 = s1.substring(s1.indexOf("\\")+1);
+					if( !df.delete() ){
+						System.out.println("删除文件错误 !!");
+						break;
+					}
 				}
-				File df = new File(dpath);
-				if( !df.exists() ){
-					System.out.println("文件不存在 !!");
-					break;
-				}
-				if( df.isDirectory() || !df.isFile() ){
-					System.out.println("文件类型错误 !!");
-					break;
-				}
-				if( !df.delete() )
-					System.out.println("删除文件错误 !!");
 				break;
 			}
 		}
@@ -239,11 +252,10 @@ public class cal {
 			switch(  tmp.substring(0, 4) ){
 			case "show":
 				ret = true;
-				Set set = vartable.entrySet() ;
-				Iterator it = vartable.entrySet().iterator();
+				it = vartable.entrySet().iterator();
 				System.out.println("变量表:");
 				while(it.hasNext()){
-					Entry entry = (Entry)it.next();
+					entry = (Entry<String, String>)it.next();
 					System.out.println(entry.toString());
 				} 
 				break;
@@ -252,13 +264,13 @@ public class cal {
 				String[] vararr = tmp.split(" ");
 				if( vararr.length < 3 )
 					break;
-				String spath = vararr[1];
-				String var = tmp.substring(4+1+spath.length()+1);
+				String spath = vararr[1].replaceAll("/s", " ");
+				String var = tmp.substring(4+1+spath.length()+1).replaceAll("/s", " ");
 				save(spath, var);
 				break;
 			case "load":
 				ret = true;
-				String lpath = tmp.split(" ")[1];
+				String lpath = tmp.split(" ")[1].replaceAll("/s", " ");
 				load(lpath);
 				break;
 			}
@@ -290,19 +302,19 @@ public class cal {
 			return false;
 		}	
 		if( exp.matches(".*[^\\)\\d]+[+-/%^\\*]+.*") ){
-			System.out.println("数不正确 !!");
+			System.out.println("数不正确1 !!");
 			return false;
 		}		
 		if( exp.matches(".*[+-/%^\\*]+[^a-z\\d]+.*") ){
-			System.out.println("数不正确 !!");
+			System.out.println("数不正确2 !!");
 			return false;
 		}		
 		exp = exp.trim();
-		Set set = trtable.entrySet() ;
-		Iterator it = trtable.entrySet().iterator();
+		Iterator<Entry<String, Integer>> it = trtable.entrySet().iterator();
 		String etmp = exp;
+		etmp = etmp.replaceAll("cuberoot", "");
 		while(it.hasNext()){
-			Entry entry = (Entry)it.next();
+			Entry<String, Integer> entry = (Entry<String, Integer>)it.next();
 			if( ((String)entry.getKey()).length() > 1 )
 				etmp = etmp.replaceAll((String)entry.getKey(), "");
 		}
@@ -363,7 +375,7 @@ public class cal {
 					i = pos1;
 					pos1 = pos2 = 0;
 				}
-				if( tmp.equals("mod") || tmp.equals("pow") || tmp.equals("roo") ){
+				if( tmp.equals("mod") || tmp.equals("pow") || (tmp.equals("roo") && etmp.charAt(i-1) != 'e' ) ){
 					++checknumber;
 					i += 2;
 				}
@@ -490,7 +502,7 @@ public class cal {
 			}
 		}
 		exp = exp.trim();
-		System.out.println(exp);
+//		System.out.println(exp);
 	}
 	
 	public String process(String tmp){		//处理表达式返回值
@@ -501,15 +513,14 @@ public class cal {
 			return null;
 		
 		optimize();
-		if( iscorrect() ) 
-			System.out.println("优化后的表达式为:" + exp);
-		else 
-			return null;		
+		System.out.println("优化后的表达式为:" + exp);
+		if( !iscorrect() ) 
+			return null;
 		
-		return calcul();
+		return cal();
 	}
 	
-	private String calcul(){			//计算表达式返回值
+	private String cal(){			//计算表达式返回值
 		String var1 = "", var2 = "";
 		String ctop;
 		String c;
@@ -522,10 +533,6 @@ public class cal {
 		c = GetNextTr();
 		while( !c.equals("#") || !optr.peek().equals("#") ){
 			ctop = optr.peek();
-			if( trtable.get(c) == null && basetr.indexOf(c) < 0 ){
-				System.out.println(c + " 函数或操作符错误 !!");
-				return null;
-			}
 			switch ( compare( ctop, c ) ) {
 			case '<':
 				optr.push(c);
@@ -562,7 +569,7 @@ public class cal {
 					var2 = oprd.pop();
 					var1 = oprd.pop();
 					Double i = new Double(var2);
-					if( i.doubleValue() - 0 <= 0.00000001 ){
+					if( ctop.equals("/") && i.doubleValue() - 0 <= 0.00000001 ){
 						System.out.println("除数不可为0 !!");
 						return null;
 					}
@@ -576,12 +583,6 @@ public class cal {
 				break;
 			}
 		}
-	/*	System.out.println("OPRD:");
-		while( !oprd.isEmpty() )
-			System.out.println(oprd.pop());
-		System.out.println("OPTR:");
-		while( !optr.isEmpty() )
-			System.out.println(optr.pop());*/
 		ans = oprd.pop();
 		return ans;
 	}

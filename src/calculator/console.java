@@ -4,7 +4,7 @@ import java.util.Scanner;
 
 public class console {
 	public static void main(String[] args) {
-		cal a = new cal();
+		calcul a = new calcul();
 		Scanner sc = new Scanner(System.in);
 		String exp, result;
 		

@@ -102,10 +102,18 @@ public class function {
 			ret = bd1.toString();
 			break;
 		case "sqrt":
+			if( d < 0 ){
+				System.out.println("负数不能开方 !!");
+				return null;
+			}
 			d = Math.sqrt(d);
 			break;
 		case "cuberoot":
 			double d1 = 1.0/3;
+			if( d < 0 ){
+				System.out.println("负数不能开n次方 !!");
+				return null;
+			}
 			d = Math.pow(d, d1);
 			break;
 		}
