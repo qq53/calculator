@@ -341,10 +341,10 @@ public class calcul {
 			System.out.println("括号个数不合法 !!");
 			return false;
 		}		
-		etmp = exp + "     ";
+		etmp = "     " + exp + "     ";
 		int cfunc = 0;	//用来跳过统计函数的,号
 		int pos1 = 0, pos2 = 0; //用来记录统计函数始末		
-		for(int i = 0; i < etmp.lastIndexOf("#"); ++i) {	//同时完成统计函数和参数变量检查
+		for(int i = 4; i < etmp.lastIndexOf("#"); ++i) {	//同时完成统计函数和参数变量检查
 			String tmp = etmp.substring(i, i+3);
 			if( cfunc !=0 ){
 				if( etmp.charAt(i) == '(' || etmp.charAt(i) == '[' ){
@@ -446,7 +446,7 @@ public class calcul {
 			if(operator2.indexOf(exp.substring(i, i+1)) >= 0) {
 				if((exp.charAt(i+1) == '+' || exp.charAt(i+1) == '-') && operator3.indexOf(exp.substring(i+2, i+3)) >= 0) {
 					int k;
-					for(k = i+3; operator3.indexOf(exp.substring(k, k+1)) > 0; k++);
+					for(k = i+3; operator3.indexOf(exp.substring(k, k+1)) >= 0; k++);
 					exp = exp.substring(0, i+1) + "(0" + exp.substring(i+1, k) + ")" + exp.substring(k);
 					continue;
 				}
@@ -510,6 +510,7 @@ public class calcul {
 			return null;
 		
 		optimize();
+		System.out.println(exp);
 		if( !iscorrect() ) 
 			return null;
 		
@@ -651,7 +652,7 @@ public class calcul {
 				ans = brd1.multiply(brd2).toString();
 				break;
 			case "/":
-				ans = brd1.divide(brd2, 2, RoundingMode.DOWN).toString();
+				ans = brd1.divide(brd2, 10, RoundingMode.DOWN).toString();
 				break;
 			case "%":
 				ans = brd1.remainder(brd2).toString();

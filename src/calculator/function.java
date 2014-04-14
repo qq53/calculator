@@ -21,7 +21,7 @@ public class function {
 			if( brd2.toString().indexOf(".") > 0){			
 				d1 = new Double(rd1);
 				d2 = new Double(rd2);	
-				if( d1 < 0 && d2 != d2.intValue() ){
+				if( d1 < 0 && (d2 - (double)d2.intValue()) <= 0.000001 ){
 					System.out.println("负数不能小数次方 !!");
 					return null;
 				}
