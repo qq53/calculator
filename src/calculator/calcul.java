@@ -16,19 +16,19 @@ import java.util.Stack;
 
 public class calcul {
 	private Stack<String> optr, oprd; 		//存放操作符,操作数
-	private String ans;								//默认结果存放
+	private String ans;								//默认结果存放每次结果
 	private Map<String, Integer> trtable;		//存运算符优先级，顺便可以判断是否支持
-	private String PS1;
+	private String PS1;										//每次输出前的提示字符串
 	private Map<String, String> vartable;		//存运算符优先级，顺便可以判断是否支持
-	private String exp;									//本次完整的表达式
+	private String exp;									//本次要处理的表达式
 	private String basetr = "+-*/%^(),[]#";	//分割之前操作符/数
-	private function func;
-	private String pwd;
+	private function func;								//计算复杂函数
+	private String pwd;										//	当前工作路径
 	private String operator2 = ",(^%*/[";        //优化去掉多余的运算符
 	private String operator3 = ".0123456789"; //判断字符是否代表数字
 	
 	private String deal_path(String base, String s){
-		s = s.replaceAll(" ", "").replaceAll("/s", " ");
+		s = s.replaceAll(" ", "").replaceAll("/s", " ");	//去多余空格 替换/s为空格
 		if( s.charAt(s.length()-1) != '\\' )	//末尾添加\
 			s += "\\";
 		if( s.indexOf(":") > 0 )
@@ -70,7 +70,7 @@ public class calcul {
 		oprd = new Stack<String>();
 		optr = new Stack<String>();
 
-		trtable = new  HashMap<String, Integer>();
+		trtable = new  HashMap<String, Integer>();		//规定运算优先级0最低
 		trtable.put("#", 0); 
 		trtable.put("+", 1);
 		trtable.put("-", 1); 
@@ -107,16 +107,16 @@ public class calcul {
 		func = new function();
 		ans = "0";
 		
-		pwd  = System.getProperty("user.dir");
+		pwd  = System.getProperty("user.dir");		//初始工作路径
 		PS1 = pwd.substring( pwd.lastIndexOf("\\") + 1 );
 		PS1 = "[ " + PS1 + " ] ";
 		
-		vartable = new  HashMap<String, String>();
+		vartable = new  HashMap<String, String>();		//申请存放变量表
 		vartable.put("ans", ans);		
 	}
 	private boolean preprocess() {			//预处理 完成变量替换 或 命令
 		String tmp = exp.substring(0, exp.length() - 1 ).trim();
-		tmp = tmp.replaceAll(" {2,}", " ");
+		tmp = tmp.replaceAll(" {2,}", " ");	//2个以上空格换成1个
 		boolean ret = false;
 		Iterator<Entry<String, String>> it;
 		Entry<String, String> entry;
@@ -130,7 +130,7 @@ public class calcul {
 		int pos = tmp.lastIndexOf("=");
 		if( pos < 0 )
 			pos = 0;
-		it = vartable.entrySet().iterator();
+		it = vartable.entrySet().iterator();		//完成变量替换
 		while(it.hasNext()){
 			entry = (Entry<String, String>)it.next();
 			int i = tmp.indexOf(entry.getKey());
@@ -243,7 +243,7 @@ public class calcul {
 			}
 		}
 		
-		if( tmp.length() >= 7 && tmp.substring(0, 3).equals("PS1") ){		//因为已经转成小写了
+		if( tmp.length() >= 7 && tmp.substring(0, 3).equals("ps1") ){		//因为已经转成小写了
 			PS1( tmp.substring( 5, tmp.length()-2 ) );
 			ret = true;
 		}
@@ -261,7 +261,7 @@ public class calcul {
 				break;
 			case "save":
 				ret = true;
-				String[] vararr = tmp.split(" ");
+				String[] vararr = tmp.split(" ");		//空格分割参数
 				if( vararr.length < 3 )
 					break;
 				String spath = vararr[1].replaceAll("/s", " ");
@@ -280,7 +280,6 @@ public class calcul {
 	}
 
 	boolean iscorrect() {				//检测表达式
-		exp = "     " + exp + "     ";
 		if( exp.matches(".*\\.\\w+\\..*") ){
 			System.out.println(".号错误 !!");
 			return false;
@@ -305,15 +304,14 @@ public class calcul {
 			System.out.println("数不正确 !!");
 			return false;
 		}		
-		if( exp.matches(".*[+-/%^\\*]+[^a-z\\d]+.*") ){
+		if( exp.matches(".*[+-/%^\\*]+[^a-z\\d\\(]+.*") ){
 			System.out.println("数不正确 !!");
 			return false;
 		}		
-		exp = exp.trim();
 		Iterator<Entry<String, Integer>> it = trtable.entrySet().iterator();
 		String etmp = exp;
-		etmp = etmp.replaceAll("cuberoot", "");
-		while(it.hasNext()){
+		etmp = etmp.replaceAll("cuberoot", "");			//先替换ROOT导致错误 认为先替换cuberoot
+		while(it.hasNext()){											//替换所有支持的函数，如果还有字母即有错误
 			Entry<String, Integer> entry = (Entry<String, Integer>)it.next();
 			if( ((String)entry.getKey()).length() > 1 )
 				etmp = etmp.replaceAll((String)entry.getKey(), "");
@@ -322,7 +320,7 @@ public class calcul {
 			System.out.println("函数名错误 !!");
 			return false;
 		}
-		int checknumber = 0;
+		int checknumber = 0;		//括号数量匹配
 		for(int i = 0; i < exp.lastIndexOf("#"); ++i) {
 			switch( exp.charAt(i) ){
 			case '(':
@@ -345,8 +343,8 @@ public class calcul {
 		}		
 		etmp = exp + "     ";
 		int cfunc = 0;	//用来跳过统计函数的,号
-		int pos1 = 0, pos2 = 0; //用来记录统计函数始末
-		for(int i = 0; i < etmp.lastIndexOf("#"); ++i) {
+		int pos1 = 0, pos2 = 0; //用来记录统计函数始末		
+		for(int i = 0; i < etmp.lastIndexOf("#"); ++i) {	//同时完成统计函数和参数变量检查
 			String tmp = etmp.substring(i, i+3);
 			if( cfunc !=0 ){
 				if( etmp.charAt(i) == '(' || etmp.charAt(i) == '[' ){
@@ -354,7 +352,7 @@ public class calcul {
 				}
 				else if( etmp.charAt(i) == ')' || etmp.charAt(i) == ']' ){
 					--cfunc;		
-					if( cfunc == 1 ){
+					if( cfunc == 1 ){			//因为低下赋值为1
 						if( etmp.charAt(i-1) != ']' ){
 							System.out.println("统计函数需要向量参数 !!");
 							return false;
@@ -369,7 +367,7 @@ public class calcul {
 				cfunc = 1;
 				i += 2;
 			}
-			if( cfunc == 0 ){
+			if( cfunc == 0 ){		//0才证明没在统计函数里
 				if( pos1+pos2 != 0 ){
 					etmp = etmp.substring(0, pos1) + etmp.substring(pos2+1);
 					i = pos1;
@@ -466,7 +464,7 @@ public class calcul {
 					exp = exp.substring(0, i+1) + "(0" + exp.substring(i+1, p) + ")" + exp.substring(p);
 					continue;
 				}
-			}
+			}	//逗号没数字补0
 			if(exp.charAt(i) == ',') {
 				if(exp.charAt(i-1) == '[' || exp.charAt(i-1) == '(') {
 					exp = exp.substring(0, i) + "0" + exp.substring(i);
@@ -547,11 +545,11 @@ public class calcul {
 				break;
 			case '>':
 				ctop = optr.pop();
-				if (ctop.length() > 1) {			
+				if (ctop.length() > 1) {	//处理普通运算符和函数		
 					if( varsum > 2) {
 						int i = varsum;
 						while( i-- > 0 )
-							var1 = oprd.pop() + "," + var1;
+							var1 = oprd.pop() + "," + var1;	//拼接统计函数参数
 						ans = func.cal(ctop, var1, varsum);
 						varsum = 1;
 					} else if (varsum == 2) {
@@ -566,7 +564,7 @@ public class calcul {
 				} else {
 					var2 = oprd.pop();
 					var1 = oprd.pop();
-					Double i = new Double(var2);
+					Double i = new Double(var2);	//简单的除法判断
 					if( ctop.equals("/") && i.doubleValue() - 0 <= 0.00000001 ){
 						System.out.println("除数不可为0 !!");
 						return null;
@@ -588,7 +586,7 @@ public class calcul {
 		char c = top.charAt(0);
 		char c1 = tr.charAt(0);
 
-		if( c1 == ',' ){		
+		if( c1 == ',' ){			//,()[]单独处理
 			if( c == '(' || c == '[' || c == ',' )
 				return '<';
 			return '>';
@@ -598,16 +596,16 @@ public class calcul {
 				return '=';
 			return '<';
 		}
-		if ( c == '(' ){
+		else if ( c == '(' ){
 			if( c1 == ')' )
 				return '=';
 			return '<';
 		}
-		if( c == ')' )
+		else if( c == ')' )
 			return '>';
 		if( c1 == '(' )
 			return '<';
-		if ( c1 == ')' ){
+		else if ( c1 == ')' ){
 			if( c == '(' )
 				return '=';
 			return '>';
@@ -617,11 +615,11 @@ public class calcul {
 				return '=';
 			return '<';
 		}
-		if( c == ']' )
+		else if( c == ']' )
 			return '>';
 		if( c1 == '[' )
 			return '<';	
-		if ( c1 == ']' ){
+		else if ( c1 == ']' ){
 			if( c == '[' )
 				return '=';
 			return '>';
@@ -663,7 +661,7 @@ public class calcul {
 				break;
 			}
 		}else 
-			ans = func.cal(tr, rd1, rd2);
+			ans = func.cal(tr, rd1, rd2);	//2参数函数
 		return ans;
 	}
 	private String GetNextTr(){
@@ -673,7 +671,7 @@ public class calcul {
 
 		while( true ){
 			c = exp.substring(i, i+1);
-			if( basetr.indexOf(c) >= 0 ){
+			if( basetr.indexOf(c) >= 0 ){		//通过basetr来取操作符、操作数
 				if( i > 0 ){
 					if( exp.charAt( i-1 ) >= 'a' )
 						ret = exp.substring(0, i);

@@ -10,7 +10,7 @@ public class function {
 		Double d1, d2;	
 		switch( name ){
 		case "log":
-			d1 = new Double(brd1.doubleValue());
+			d1 = new Double(brd1.doubleValue());	//换底公式 log(a)b = lgb/lga
 			d2 = new Double(brd2.doubleValue());			
 			d1 = Math.log(d1);
 			d2 = Math.log(d2);
@@ -40,7 +40,7 @@ public class function {
 				System.out.println("根号运算不能负 !!");
 				return null;
 			}
-			BigDecimal bone = new BigDecimal("1");
+			BigDecimal bone = new BigDecimal("1");	//转成POW
 			bone = bone.divide(brd1, 10, RoundingMode.DOWN);
 			brd1 = new BigDecimal( cal("pow", rd2, bone.toString()) );
 			break;
@@ -107,7 +107,7 @@ public class function {
 			d = Math.sqrt(d);
 			break;
 		case "cuberoot":
-			double d1 = 1.0/3;
+			double d1 = 1.0/3;	//也转成POW
 			if( d < 0 ){
 				System.out.println("负数不能开n次方 !!");
 				return null;
