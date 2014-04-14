@@ -302,11 +302,11 @@ public class calcul {
 			return false;
 		}	
 		if( exp.matches(".*[^\\)\\d]+[+-/%^\\*]+.*") ){
-			System.out.println("数不正确1 !!");
+			System.out.println("数不正确 !!");
 			return false;
 		}		
 		if( exp.matches(".*[+-/%^\\*]+[^a-z\\d]+.*") ){
-			System.out.println("数不正确2 !!");
+			System.out.println("数不正确 !!");
 			return false;
 		}		
 		exp = exp.trim();
@@ -428,23 +428,23 @@ public class calcul {
 			if(operator3.indexOf(exp.substring(i, i+1)) > 0 && (exp.charAt(i+1) >= 'a' && exp.charAt(i+1) <= 'z')) {				
 				exp = exp.substring(0, i+1) + "*" + exp.substring(i+1);
 				continue;
-			}
+			}	//++ -> +
 			if( exp.substring(i,i+2).equals("++") ) {
 				exp = exp.substring(0, i+1) + exp.substring(i+2);
 				continue;
-			}
+			}	//+- -> -
 			if( exp.substring(i,i+2).equals("+-") ) { 
 				exp = exp.substring(0, i) + exp.substring(i+1);
 				continue;
-			}
+			} 	// -- -> +
 			if( exp.substring(i,i+2).equals("--") ) { 
 				exp = exp.substring(0, i) + "+" + exp.substring(i+2);
 				continue;
-			}
+			}	// -+ -> -
 			if( exp.substring(i,i+2).equals("-+") ) {
 				exp = exp.substring(0, i+1) + exp.substring(i+2);
 				continue;
-			}
+			}	//负数换成0-
 			if(operator2.indexOf(exp.substring(i, i+1)) >= 0) {
 				if((exp.charAt(i+1) == '+' || exp.charAt(i+1) == '-') && operator3.indexOf(exp.substring(i+2, i+3)) >= 0) {
 					int k;
@@ -476,7 +476,7 @@ public class calcul {
 					exp = exp.substring(0, i+1) + "0" + exp.substring(i+1);
 					continue;
 				}
-			}
+			}	//yroot -> root(y,x)
 			if(exp.charAt(i) == '*' && exp.charAt(i+1) == 'r') {
 				if(exp.substring(i+1, i+5).equals("root")) {
 					if(exp.charAt(i-1) == ')') {
@@ -502,7 +502,6 @@ public class calcul {
 			}
 		}
 		exp = exp.trim();
-//		System.out.println(exp);
 	}
 	
 	public String process(String tmp){		//处理表达式返回值
@@ -513,7 +512,6 @@ public class calcul {
 			return null;
 		
 		optimize();
-		System.out.println("优化后的表达式为:" + exp);
 		if( !iscorrect() ) 
 			return null;
 		
@@ -701,7 +699,7 @@ public class calcul {
 		PS1 = format + " ";
 	}
 	public void save(String file, String var){			//提供保存变量到文件 
-		String path = pwd + "\\" + file;
+		String path = deal_path(pwd, file);
 		try {
 			FileWriter fw = new FileWriter(path);
 			
@@ -717,8 +715,7 @@ public class calcul {
 		}
 	}
 	public void load(String path) {				//加载文件变量
-		if( path.indexOf(".") > 0 || path.indexOf("\\") <= 0 )
-			path = pwd + "\\" + path;
+		path = deal_path(pwd, path);
 		try {
 			FileReader fr = new FileReader(path);
 			BufferedReader br = new BufferedReader(fr);

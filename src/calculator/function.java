@@ -5,7 +5,6 @@ import java.math.RoundingMode;
 
 public class function {
 	public String cal(String name, String rd1, String rd2){	//双变量函数
-//		System.out.println(rd1 + name + rd2);
 		BigDecimal brd1 = new BigDecimal(rd1);
 		BigDecimal brd2 = new BigDecimal(rd2);	
 		Double d1, d2;	
@@ -42,14 +41,13 @@ public class function {
 				return null;
 			}
 			BigDecimal bone = new BigDecimal("1");
-			bone = bone.divide(brd1, 3, RoundingMode.DOWN);
+			bone = bone.divide(brd1, 10, RoundingMode.DOWN);
 			brd1 = new BigDecimal( cal("pow", rd2, bone.toString()) );
 			break;
 		}
 		return brd1.toString();
 	}
 	public String cal(String name, String rd){	//处理单变量
-//		System.out.println(name + " " + rd);
 		Double d = new Double(rd);
 		String ret = "";
 		BigDecimal bd1, bd2, bn1;
@@ -122,7 +120,6 @@ public class function {
 		return ret;
 	}	
 	public String cal(String name, String rd, int varsum){		//处理向量函数
-//		System.out.println(name + "[" + rd + "]");	
 		BigDecimal bd1 = new BigDecimal("0");
 		BigDecimal bd2 = new BigDecimal("0");
 		int i;
@@ -161,12 +158,12 @@ public class function {
 			bd2 = new BigDecimal( varsum );	
 			BigDecimal bone = new BigDecimal("-1");
 			bd2 = bd2.add(bone);
-			bd1 = bd1.divide(bd2, 2, RoundingMode.DOWN);
+			bd1 = bd1.divide(bd2, 10, RoundingMode.DOWN);
 			break;	
 		case "varp":
 			bd1 = new BigDecimal( cal("sumavg",rd,varsum) );
 			bd2 = new BigDecimal( varsum );	
-			bd1 = bd1.divide(bd2, 2, RoundingMode.DOWN);
+			bd1 = bd1.divide(bd2, 10, RoundingMode.DOWN);
 			break;	
 		case "stdev":
 			bd1 = new BigDecimal( cal("var",rd,varsum) );
