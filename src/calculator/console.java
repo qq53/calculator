@@ -1,4 +1,4 @@
-package calculator;
+ï»¿package calculator;
 
 import java.util.Scanner;
 
@@ -8,7 +8,7 @@ public class console {
 		Scanner sc = new Scanner(System.in);
 		String exp, result;
 		
-		a.println("ÊäÈë±í´ïÊ½(ÊäquitÍË³ö):");
+		a.println("è¾“å…¥è¡¨è¾¾å¼(è¾“quité€€å‡º):");
 		while( true ){
 			exp = sc.nextLine();
 			if( exp.equals("quit") ){

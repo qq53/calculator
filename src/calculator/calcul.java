@@ -1,4 +1,4 @@
-package calculator;
+ï»¿package calculator;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -15,23 +15,24 @@ import java.util.Map.Entry;
 import java.util.Stack;
 
 public class calcul {
-	private Stack<String> optr, oprd; 		//´æ·Å²Ù×÷·û,²Ù×÷Êı
-	private String ans;								//Ä¬ÈÏ½á¹û´æ·ÅÃ¿´Î½á¹û
-	private Map<String, Integer> trtable;		//´æÔËËã·ûÓÅÏÈ¼¶£¬Ë³±ã¿ÉÒÔÅĞ¶ÏÊÇ·ñÖ§³Ö
-	private String PS1;										//Ã¿´ÎÊä³öÇ°µÄÌáÊ¾×Ö·û´®
-	private Map<String, String> vartable;		//´æÔËËã·ûÓÅÏÈ¼¶£¬Ë³±ã¿ÉÒÔÅĞ¶ÏÊÇ·ñÖ§³Ö
-	private String exp;									//±¾´ÎÒª´¦ÀíµÄ±í´ïÊ½
-	private String basetr = "+-*/%^(),[]#";	//·Ö¸îÖ®Ç°²Ù×÷·û/Êı
-	private function func;								//¼ÆËã¸´ÔÓº¯Êı
-	private String pwd;										//	µ±Ç°¹¤×÷Â·¾¶
-	private String operator2 = " ,(^%*/[";        //ÓÅ»¯È¥µô¶àÓàµÄÔËËã·û
-	private String operator3 = ".0123456789"; //ÅĞ¶Ï×Ö·ûÊÇ·ñ´ú±íÊı×Ö
-	private String separator;					//¶àÆ½Ì¨ÏÂµÄÂ·¾¶·Ö¸ô·û
-	private String LF;							//¶àÆ½Ì¨ÏÂµÄ»»ĞĞ·û
+	private Stack<String> optr, oprd; 		//å­˜æ”¾æ“ä½œç¬¦,æ“ä½œæ•°
+	private String ans;								//é»˜è®¤ç»“æœå­˜æ”¾æ¯æ¬¡ç»“æœ
+	private Map<String, Integer> trtable;		//å­˜è¿ç®—ç¬¦ä¼˜å…ˆçº§ï¼Œé¡ºä¾¿å¯ä»¥åˆ¤æ–­æ˜¯å¦æ”¯æŒ
+	private String PS1;										//æ¯æ¬¡è¾“å‡ºå‰çš„æç¤ºå­—ç¬¦ä¸²
+	private Map<String, String> vartable;		//å­˜è¿ç®—ç¬¦ä¼˜å…ˆçº§ï¼Œé¡ºä¾¿å¯ä»¥åˆ¤æ–­æ˜¯å¦æ”¯æŒ
+	private String exp;									//æœ¬æ¬¡è¦å¤„ç†çš„è¡¨è¾¾å¼
+	private String basetr = "+-*/%^(),[]#";	//åˆ†å‰²ä¹‹å‰æ“ä½œç¬¦/æ•°
+	private function func;								//è®¡ç®—å¤æ‚å‡½æ•°
+	private String pwd;										//	å½“å‰å·¥ä½œè·¯å¾„
+	private String operator2 = " ,(^%*/[";        //ä¼˜åŒ–å»æ‰å¤šä½™çš„è¿ç®—ç¬¦
+	private String operator3 = ".0123456789"; //åˆ¤æ–­å­—ç¬¦æ˜¯å¦ä»£è¡¨æ•°å­—
+	private String separator;					//å¤šå¹³å°ä¸‹çš„è·¯å¾„åˆ†éš”ç¬¦
+	private String LF;							//å¤šå¹³å°ä¸‹çš„æ¢è¡Œç¬¦
+	private boolean PS1_lock = false; 	//æ˜¯å¦æ”¹å˜PS1
 	
 	private String deal_path(String base, String s){
-		s = s.replaceAll(" ", "").replaceAll("/s", " ");	//ÅĞ¶Ï×Ö·ûÊÇ·ñ´ú±íÊı×Ö
-		if( s.charAt(s.length()-1) != separator.charAt(0) )	//Ä©Î²Ìí¼Ó·Ö¸ô·û
+		s = s.replaceAll(" ", "").replaceAll("/s", " ");	//åˆ¤æ–­å­—ç¬¦æ˜¯å¦ä»£è¡¨æ•°å­—
+		if( s.charAt(s.length()-1) != separator.charAt(0) )	//æœ«å°¾æ·»åŠ åˆ†éš”ç¬¦
 			s += separator;
 		if( s.indexOf(":") > 0 || s.indexOf(0) == '/' )
 			if( isExist(s) )
@@ -48,7 +49,7 @@ public class calcul {
 					tmp = tmp.substring(0, 1);
 				break;
 			default:
-				if( s.substring(0, s.indexOf(separator)).indexOf(".") >= 0 ) // 2¸öÒÔÉÏ.²»´¦Àí
+				if( s.substring(0, s.indexOf(separator)).indexOf(".") >= 0 ) // 2ä¸ªä»¥ä¸Š.ä¸å¤„ç†
 					break;
 				tmp += separator + s.substring(0, s.indexOf(separator));
 				break;
@@ -65,7 +66,7 @@ public class calcul {
 		return false;
 	}
 	calcul(){
-		trtable = new  HashMap<String, Integer>();		//¹æ¶¨ÔËËãÓÅÏÈ¼¶0×îµÍ
+		trtable = new  HashMap<String, Integer>();		//è§„å®šè¿ç®—ä¼˜å…ˆçº§0æœ€ä½
 		trtable.put("#", 0); 
 		trtable.put("+", 1);
 		trtable.put("-", 1); 
@@ -114,17 +115,17 @@ public class calcul {
 	public void println(String str){
 		System.out.print(PS1 + str);
 	}
-	public void init(){					//ÖØĞÂ³õÊ¼»¯»·¾³
+	public void init(){					//é‡æ–°åˆå§‹åŒ–ç¯å¢ƒ
 		oprd = new Stack<String>();
 		optr = new Stack<String>();
 
 		ans = "0";
 		
-		pwd  = System.getProperty("user.dir");		//ÖØĞÂ³õÊ¼»¯»·¾³
+		pwd  = System.getProperty("user.dir");		//é‡æ–°åˆå§‹åŒ–ç¯å¢ƒ
 		PS1 = pwd.substring( pwd.lastIndexOf(separator) + 1 );
 		PS1 = "[ " + PS1 + " ] ";
 		
-		vartable = new  HashMap<String, String>();		//ÉêÇë´æ·Å±äÁ¿±í
+		vartable = new  HashMap<String, String>();		//ç”³è¯·å­˜æ”¾å˜é‡è¡¨
 		vartable.put("ans", ans);		
 	}
 	private String vareplace(String tmp){
@@ -132,9 +133,9 @@ public class calcul {
 		Entry<String, String> entry;
 		int i, j, len;
 		
-		//·ÀÖ¹Ô½½ç
+		//é˜²æ­¢è¶Šç•Œ
 		tmp = "     " + tmp + "     ";
-		it = vartable.entrySet().iterator();		//±éÀú±äÁ¿±í
+		it = vartable.entrySet().iterator();		//éå†å˜é‡è¡¨
 		while(it.hasNext()){
 			entry = (Entry<String, String>)it.next();
 			for( i = tmp.indexOf(entry.getKey()); i > 0; i = tmp.indexOf(entry.getKey()) ){
@@ -144,26 +145,25 @@ public class calcul {
 					tmp = tmp.substring(0, i) + entry.getValue() + tmp.substring(i+len);
 			}
 		} 
-		tmp = tmp.trim();		//»¹Ô­¼ÓµÄ¿Õ¸ñ
+		tmp = tmp.trim();		//è¿˜åŸåŠ çš„ç©ºæ ¼
 		return tmp;	
 	}
 	
-	private boolean preprocess() {			//Ô¤´¦Àí Íê³É±äÁ¿Ìæ»» »ò ÃüÁî
+	private boolean preprocess() {			//é¢„å¤„ç† å‘½ä»¤
 		String tmp = exp.trim();
 		tmp = tmp.substring(0, tmp.length()-1);
-		tmp = tmp.replaceAll(" {2,}", " ");	//Ô¤´¦Àí Íê³É±äÁ¿Ìæ»» »ò ÃüÁî
-		tmp = tmp.toLowerCase(); 		
+		tmp = tmp.replaceAll(" {2,}", " ");	//å»æ‰å¤šä½™ç©ºæ ¼
 		boolean ret = false;
 		Iterator<Entry<String, String>> it;
 		Entry<String, String> entry;
 	
 		if( tmp.indexOf("=") != tmp.lastIndexOf("=") ){
-			System.out.println("=ºÅ³¬¹ı2¸ö !!");
+			System.out.println("=å·è¶…è¿‡2ä¸ª !!");
 			return true;
 		}
 		
 		if( tmp.indexOf("=") > 0 ){
-			tmp = tmp.replaceAll(" ", "");	//=ºÅ±í´ïÊ½ ²»ĞèÒª¿Õ¸ñ
+			tmp = tmp.replaceAll(" ", "");	//=å·è¡¨è¾¾å¼ ä¸éœ€è¦ç©ºæ ¼
 			ret = true;
 			String var = "", varexp = "";
 			int count = 0;
@@ -178,10 +178,10 @@ public class calcul {
 				++count;
 			}
 			if( var.equals("") || varexp.equals("") )
-				System.out.println("=ºÅÊ¹ÓÃ´íÎó");
+				System.out.println("=å·ä½¿ç”¨é”™è¯¯");
 			else{
 				if( trtable.get(var) != null || var.equals("ans") || var.matches(".*\\d+.*") )
-					System.out.println("±äÁ¿Ãû²»¿ÉÓÃ !!");
+					System.out.println("å˜é‡åä¸å¯ç”¨ !!");
 				else{
 					if( varexp.indexOf(";") > 0 )
 						f_print = false;
@@ -216,30 +216,32 @@ public class calcul {
 				break;
 			case "cd":
 				ret = true;
-				if( tmp.charAt(2) != ' ' && tmp.length() < 4 ){
-					System.out.println("cdÃüÁî²ÎÊı´íÎó !! ");
+				if( tmp.charAt(2) != ' ' || tmp.length() < 4 ){
+					System.out.println("cdå‘½ä»¤å‚æ•°é”™è¯¯ !! ");
 					return true;
 				}
 				String s = tmp.substring(3);
 				String tpwd = deal_path(pwd, s);
 				if( !isExist(tpwd) ){
-					System.out.println("Ä¿Â¼²»´æÔÚ !!");
+					System.out.println("ç›®å½•ä¸å­˜åœ¨ !!");
 					break;
 				}
 				pwd = tpwd;
-				if( pwd.lastIndexOf(separator) >= 0 && pwd.length() > 1 ){
-					PS1 = pwd.substring( pwd.lastIndexOf(separator) + 1 );
-					PS1 = "[ " + PS1 + " ] ";
-				}
-				else{
-					PS1 = pwd.substring(0, 1);
-					PS1 = "[ " + PS1 + " ] ";
+				if( !PS1_lock ){
+					if( pwd.lastIndexOf(separator) >= 0 && pwd.length() > 1 ){
+						PS1 = pwd.substring( pwd.lastIndexOf(separator) + 1 );
+						PS1 = "[ " + PS1 + " ] ";
+					}
+					else{
+						PS1 = pwd.substring(0, 1);
+						PS1 = "[ " + PS1 + " ] ";
+					}
 				}
 				break;
 			case "rm":
 				ret = true;
-				if( tmp.charAt(2) != ' ' ){
-					System.out.println("rmÃüÁîĞèÒª²ÎÊı !!");
+				if( tmp.charAt(2) != ' ' || tmp.length() < 4 ){
+					System.out.println("rmå‘½ä»¤éœ€è¦å‚æ•° !!");
 					return true;
 				}
 				String[] vararr = tmp.substring(3).split(" ");
@@ -247,22 +249,22 @@ public class calcul {
 					String dpath = deal_path(pwd, vararr[i]);
 					File df = new File(dpath);
 					if( !df.exists() ){
-						System.out.println("ÎÄ¼ş²»´æÔÚ !!");
+						System.out.println("æ–‡ä»¶ä¸å­˜åœ¨ !!");
 						break;
 					}
 					if( df.isDirectory() || !df.isFile() ){
-						System.out.println("Ä¿Â¼²»´æÔÚ !!");
+						System.out.println("ç›®å½•ä¸å­˜åœ¨ !!");
 						break;
 					}
 					if( !df.delete() ){
-						System.out.println("É¾³ıÎÄ¼ş´íÎó !!");
+						System.out.println("åˆ é™¤æ–‡ä»¶é”™è¯¯ !!");
 						break;
 					}
 				}
 				break;
 			}
 		}
-		if( tmp.length() >= 7 && tmp.substring(0, 3).equals("ps1") ){		//ÒòÎªÒÑ¾­×ª³ÉĞ¡Ğ´ÁË
+		if( tmp.length() >= 7 && tmp.substring(0, 3).equals("ps1") ){
 			PS1( tmp.substring( 5, tmp.length()-2 ) );
 			ret = true;
 		}
@@ -271,7 +273,7 @@ public class calcul {
 			case "show":
 				ret = true;
 				it = vartable.entrySet().iterator();
-				System.out.println("±äÁ¿±í:");
+				System.out.println("å˜é‡è¡¨:");
 				while(it.hasNext()){
 					entry = (Entry<String, String>)it.next();
 					System.out.println(entry.toString());
@@ -279,15 +281,21 @@ public class calcul {
 				break;
 			case "save":
 				ret = true;
-				String[] vararr = tmp.split(" ");		//¿Õ¸ñ·Ö¸î²ÎÊı
-				if( vararr.length < 3 )
+				String[] vararr = tmp.split(" ");		//ç©ºæ ¼åˆ†å‰²å‚æ•°
+				if( vararr.length < 3 ){
+					System.out.println("saveå‚æ•°ä¸å…¨ !!");
 					break;
+				}
 				String spath = vararr[1].replaceAll("/s", " ");
 				String var = tmp.substring(4+1+spath.length()+1).replaceAll("/s", " ");
 				save(spath, var);
 				break;
 			case "load":
 				ret = true;
+				if(tmp.length() < 6){
+					System.out.println("loadéœ€è¦å‚æ•° !!");
+					break;
+				}
 				String lpath = tmp.split(" ")[1].replaceAll("/s", " ");
 				load(lpath);
 				break;
@@ -300,52 +308,52 @@ public class calcul {
 		return ret;
 	}
 
-	boolean iscorrect() {				//¼ì²â±í´ïÊ½
+	boolean iscorrect() {				//æ£€æµ‹è¡¨è¾¾å¼
 		if( exp.matches(".*\\.\\w+\\..*") ){
-			System.out.println(".ºÅ´íÎó !!");
+			System.out.println(".å·é”™è¯¯ !!");
 			return false;
 		}
 		if( exp.matches(".*[^\\d]+\\.[^\\d]+.*") ){
-			System.out.println(".ºÅ´íÎó !!");
+			System.out.println(".å·é”™è¯¯ !!");
 			return false;
 		}
 		if( exp.matches(".*[\\(\\[]+[\\)\\]]+.*") ){
-			System.out.println("²ÎÊı²»ÄÜÎª¿Õ !!");
+			System.out.println("å‚æ•°ä¸èƒ½ä¸ºç©º !!");
 			return false;
 		}
-		if( exp.matches(".*[a-z]+.*") && !exp.matches(".*[a-z]+\\(.*\\).*") ){
-			System.out.println("º¯ÊıĞèÒª²ÎÊı !!");
+		if( exp.matches(".*[a-zA-Z]+.*") && !exp.matches(".*[a-zA-Z]+\\(.*\\).*") ){
+			System.out.println("å‡½æ•°éœ€è¦å‚æ•° !!");
 			return false;
 		}		
 		if( exp.matches("[^\\(]+,[^\\)]+") ){
-			System.out.println(",ºÅ´íÎó !!");
+			System.out.println(",å·é”™è¯¯ !!");
 			return false;
 		}	
 		if( exp.matches(".*[^\\)\\d]+[+-/%^\\*]+.*") ){
-			System.out.println("²Ù×÷Êı´íÎó !!");
+			System.out.println("æ“ä½œæ•°é”™è¯¯ !!");
 			return false;
 		}		
-		if( exp.matches(".*[+-/%^\\*]+[^a-z\\d\\(]+.*") ){
-			System.out.println("²Ù×÷Êı´íÎó !!");
+		if( exp.matches(".*[+-/%^\\*]+[^a-zA-Z\\d\\(]+.*") ){
+			System.out.println("æ“ä½œæ•°é”™è¯¯ !!");
 			return false;
 		}
 		if( exp.indexOf("\\") > 0 || exp.matches(".*[`~!@$&']+.*") ){
-			System.out.println("ÓĞ·Ç·¨×Ö·û !!");
+			System.out.println("æœ‰éæ³•å­—ç¬¦ !!");
 			return false;
 		}		
 		Iterator<Entry<String, Integer>> it = trtable.entrySet().iterator();
 		String etmp = exp;
-		etmp = etmp.replaceAll("cuberoot", "");			//ÏÈÌæ»»ROOTµ¼ÖÂ´íÎó ÈÏÎªÏÈÌæ»»cuberoot
-		while(it.hasNext()){											//Ìæ»»ËùÓĞÖ§³ÖµÄº¯Êı£¬Èç¹û»¹ÓĞ×ÖÄ¸ÔòÓĞ´í
+		etmp = etmp.replaceAll("cuberoot", "");			//å…ˆæ›¿æ¢ROOTå¯¼è‡´é”™è¯¯ è®¤ä¸ºå…ˆæ›¿æ¢cuberoot
+		while(it.hasNext()){											//æ›¿æ¢æ‰€æœ‰æ”¯æŒçš„å‡½æ•°ï¼Œå¦‚æœè¿˜æœ‰å­—æ¯åˆ™æœ‰é”™
 			Entry<String, Integer> entry = (Entry<String, Integer>)it.next();
 			if( ((String)entry.getKey()).length() > 1 )
 				etmp = etmp.replaceAll((String)entry.getKey(), "");
 		}
-		if( etmp.matches(".*[a-z]+.*") ){
-			System.out.println("º¯ÊıÃû´íÎó !!");
+		if( etmp.matches(".*[a-zA-Z]+.*") ){
+			System.out.println("å‡½æ•°åé”™è¯¯ !!");
 			return false;
 		}
-		int checknumber = 0;		//¼ì²âÀ¨ºÅÊıÁ¿Æ¥Åä
+		int checknumber = 0;		//æ£€æµ‹æ‹¬å·æ•°é‡åŒ¹é…
 		for(int i = 0; i < exp.lastIndexOf("#"); ++i) {
 			switch( exp.charAt(i) ){
 			case '(':
@@ -363,13 +371,13 @@ public class calcul {
 			}		
 		}
 		if( checknumber != 0 )	{
-			System.out.println("À¨ºÅÊ¹ÓÃ´íÎó !!");
+			System.out.println("æ‹¬å·ä½¿ç”¨é”™è¯¯ !!");
 			return false;
 		}		
 		etmp = "     " + exp + "     ";
-		int cfunc = 0;	//ÓÃÀ´Ìø¹ıÍ³¼Æº¯Êı,ºÅ
-		int pos1 = 0, pos2 = 0; //ÓÃÀ´¼ÇÂ¼Í³¼Æº¯ÊıÊ¼Ä©
-		for(int i = 4; i < etmp.lastIndexOf("#"); ++i) {	//Í¬Ê±Íê³ÉÍ³¼Æº¯ÊıºÍ²ÎÊı±äÁ¿¼ì²â
+		int cfunc = 0;	//ç”¨æ¥è·³è¿‡ç»Ÿè®¡å‡½æ•°,å·
+		int pos1 = 0, pos2 = 0; //ç”¨æ¥è®°å½•ç»Ÿè®¡å‡½æ•°å§‹æœ«
+		for(int i = 5; i < etmp.lastIndexOf("#"); ++i) {	//åŒæ—¶å®Œæˆç»Ÿè®¡å‡½æ•°å’Œå‚æ•°å˜é‡æ£€æµ‹
 			String tmp = etmp.substring(i, i+3);
 			if( cfunc !=0 ){
 				if( etmp.charAt(i) == '(' || etmp.charAt(i) == '[' ){
@@ -377,9 +385,9 @@ public class calcul {
 				}
 				else if( etmp.charAt(i) == ')' || etmp.charAt(i) == ']' ){
 					--cfunc;		
-					if( cfunc == 1 ){			//ÒòÎªµÍÏÂ´úÂë¸³ÖµÎª1
+					if( cfunc == 1 ){			//å› ä¸ºä½ä¸‹ä»£ç èµ‹å€¼ä¸º1
 						if( etmp.charAt(i-1) != ']' ){
-							System.out.println("Í³¼Æº¯ÊıĞèÒªÏòÁ¿²ÎÊı !!");
+							System.out.println("ç»Ÿè®¡å‡½æ•°éœ€è¦å‘é‡å‚æ•° !!");
 							return false;
 						}
 						--cfunc;
@@ -392,7 +400,7 @@ public class calcul {
 				cfunc = 1;
 				i += 2;
 			}
-			if( cfunc == 0 ){		//0²ÅÖ¤Ã÷Ã»ÔÚÍ³¼Æº¯ÊıÀï
+			if( cfunc == 0 ){		//0æ‰è¯æ˜æ²¡åœ¨ç»Ÿè®¡å‡½æ•°é‡Œ
 				if( pos1+pos2 != 0 ){
 					etmp = etmp.substring(0, pos1) + etmp.substring(pos2+1);
 					i = pos1;
@@ -407,15 +415,15 @@ public class calcul {
 			}
 		}				
 		if( checknumber != 0 ){
-			System.out.println("º¯Êı²ÎÊı¸öÊı´íÎó !!");
+			System.out.println("å‡½æ•°å‚æ•°ä¸ªæ•°é”™è¯¯ !!");
 			return false;
 		}
 		
 		return true;
 	}
-	void optimize() { 			//ÓÅ»¯±í´ïÊ½
-		exp = exp.replaceAll(" " , ""); 	//È¥¿Õ¸ñ
-		exp = "     " + exp + "     ";	//·ÀÖ¹Ô½½ç
+	void optimize() { 			//ä¼˜åŒ–è¡¨è¾¾å¼
+		exp = exp.replaceAll(" " , ""); 	//å»ç©ºæ ¼
+		exp = "     " + exp + "     ";	//é˜²æ­¢è¶Šç•Œ
 		for(int i = 5; i < exp.lastIndexOf("#"); ++i ) {  //.1 -> 0.1
 			if( exp.charAt(i+1) == '.' && operator3.indexOf(exp.substring(i, i+1)) < 0 ){
 				exp = exp.substring(0, i + 1) + "0" + exp.substring(i + 1);	
@@ -466,7 +474,7 @@ public class calcul {
 			if( exp.substring(i,i+2).equals("-+") ) {
 				exp = exp.substring(0, i+1) + exp.substring(i+2);
 				continue;
-			}	//¸ºÊı»»³É0-
+			}	//è´Ÿæ•°æ¢æˆ0-
 			if(operator2.indexOf(exp.substring(i, i+1)) >= 0) {
 				if((exp.charAt(i+1) == '+' || exp.charAt(i+1) == '-') && operator3.indexOf(exp.substring(i+2, i+3)) > 0) {
 					int k;
@@ -488,7 +496,7 @@ public class calcul {
 					exp = exp.substring(0, i+1) + "(0" + exp.substring(i+1, p) + ")" + exp.substring(p);
 					continue;
 				}
-			}	//¶ººÅÃ»Êı×Ö²¹0
+			}	//é€—å·æ²¡æ•°å­—è¡¥0
 			if(exp.charAt(i) == ',') {
 				if(exp.charAt(i-1) == '[' || exp.charAt(i-1) == '(') {
 					exp = exp.substring(0, i) + "0" + exp.substring(i);
@@ -526,7 +534,7 @@ public class calcul {
 		exp = exp.trim();
 	}
 	
-	public String process(String tmp){		//´¦Àí±í´ïÊ½·µ»ØÖµ
+	public String process(String tmp){		//å¤„ç†è¡¨è¾¾å¼è¿”å›å€¼
 		
 		exp = tmp + "#";
 		
@@ -540,7 +548,7 @@ public class calcul {
 		return cal();
 	}
 	
-	private String cal(){			//¼ÆËã±í´ïÊ½·µ»ØÖµ
+	private String cal(){			//è®¡ç®—è¡¨è¾¾å¼è¿”å›å€¼
 		String var1 = "", var2 = "";
 		String ctop;
 		String c;
@@ -569,11 +577,11 @@ public class calcul {
 				break;
 			case '>':
 				ctop = optr.pop();
-				if (ctop.length() > 1) {	//´¦ÀíÆÕÍ¨ÔËËã·ûºÍº¯Êı	
+				if (ctop.length() > 1) {	//å¤„ç†æ™®é€šè¿ç®—ç¬¦å’Œå‡½æ•°	
 					if( varsum > 2) {
 						int i = varsum;
 						while( i-- > 0 )
-							var1 = oprd.pop() + "," + var1;	//Æ´½ÓÍ³¼Æº¯Êı²ÎÊı
+							var1 = oprd.pop() + "," + var1;	//æ‹¼æ¥ç»Ÿè®¡å‡½æ•°å‚æ•°
 						ans = func.cal(ctop, var1, varsum);
 						varsum = 1;
 					} else if (varsum == 2) {
@@ -588,11 +596,6 @@ public class calcul {
 				} else {
 					var2 = oprd.pop();
 					var1 = oprd.pop();
-					Double i = new Double(var2);	//¼òµ¥µÄ³ı·¨ÅĞ¶Ï
-					if( ctop.equals("/") && i.doubleValue() - 0 <= 0.00000001 ){
-						System.out.println("³ıÊı²»¿ÉÎª0 !!");
-						return null;
-					}
 					ans = cal(ctop, var1, var2);
 				}
 				if( ans == null )
@@ -606,11 +609,11 @@ public class calcul {
 		ans = oprd.pop();
 		return ans;
 	}
-	private char compare(String top, String tr){							//¼òµ¥µÄ³ı·¨ÅĞ¶Ï
+	private char compare(String top, String tr){							//ç®€å•çš„é™¤æ³•åˆ¤æ–­
 		char c = top.charAt(0);
 		char c1 = tr.charAt(0);
 
-		if( c1 == ',' ){			//,()[]µ¥¶À´¦Àí
+		if( c1 == ',' ){			//,()[]å•ç‹¬å¤„ç†
 			if( c == '(' || c == '[' || c == ',' )
 				return '<';
 			return '>';
@@ -659,7 +662,7 @@ public class calcul {
 		else
 			return i1 > i2?'>':'<';
 	}
-	private String cal(String tr, String rd1,  String rd2){		//¼ÆËãË«Ä¿ÔËËã·û,¼òµ¥µÄ±¾º¯Êı´¦Àí£¬¸´ÔÓµÄ½»¸øfunctionÀà
+	private String cal(String tr, String rd1,  String rd2){		//è®¡ç®—åŒç›®è¿ç®—ç¬¦,ç®€å•çš„æœ¬å‡½æ•°å¤„ç†ï¼Œå¤æ‚çš„äº¤ç»™functionç±»
 		BigDecimal brd1 = new BigDecimal(rd1);
 		BigDecimal brd2 = new BigDecimal(rd2);		
 
@@ -675,6 +678,11 @@ public class calcul {
 				ans = brd1.multiply(brd2).toString();
 				break;
 			case "/":
+				Double i = new Double(rd2);	//ç®€å•çš„é™¤æ³•åˆ¤æ–­
+				if( i.doubleValue() - 0 <= 0.00000001 ){
+					System.out.println("é™¤æ•°ä¸å¯ä¸º0 !!");
+					return null;
+				}
 				ans = brd1.divide(brd2, 10, RoundingMode.DOWN).toString();
 				break;
 			case "%":
@@ -682,7 +690,7 @@ public class calcul {
 				break;
 			case "^":
 				if( brd1.intValue() < 0 && rd2.indexOf(".") > 0 ){
-					System.out.println("¸ºÊı²»ÄÜÓĞĞ¡Êı´Î·½ !!");
+					System.out.println("è´Ÿæ•°ä¸èƒ½æœ‰å°æ•°æ¬¡æ–¹ !!");
 					return null;
 				}
 				if( brd2.intValue() < 0){
@@ -696,7 +704,7 @@ public class calcul {
 				break;
 			}
 		}else 
-			ans = func.cal(tr, rd1, rd2);	//2²ÎÊıº¯Êı
+			ans = func.cal(tr, rd1, rd2);	//2å‚æ•°å‡½æ•°
 		return ans;
 	}
 	private String GetNextTr(){
@@ -706,7 +714,7 @@ public class calcul {
 
 		while( true ){
 			c = exp.substring(i, i+1);
-			if( basetr.indexOf(c) >= 0 ){		//Í¨¹ıbasetrÀ´È¡²Ù×÷·û¡¢²Ù×÷Êı
+			if( basetr.indexOf(c) >= 0 ){		//é€šè¿‡basetræ¥å–æ“ä½œç¬¦ã€æ“ä½œæ•°
 				if( i > 0 ){
 					if( exp.charAt( i-1 ) >= 'a' )
 						ret = exp.substring(0, i);
@@ -728,10 +736,11 @@ public class calcul {
 		}			
 		return ret;
 	}
-	public void PS1(String format){			//¸Ä±äCONSOLE Ã¿´ÎÃüÁîÇ°µÄÌáÊ¾£¨±ÈÈç "[root /]# "£©
+	public void PS1(String format){			//æ”¹å˜CONSOLE æ¯æ¬¡å‘½ä»¤å‰çš„æç¤ºï¼ˆæ¯”å¦‚ "[root /]# "ï¼‰
 		PS1 = format + " ";
+		PS1_lock = true;
 	}
-	public void save(String file, String var){			//Ìá¹©±£´æ±äÁ¿µ½ÎÄ¼ş 
+	public void save(String file, String var){			//æä¾›ä¿å­˜å˜é‡åˆ°æ–‡ä»¶ 
 		String path = deal_path(pwd, file);
 		try {
 			FileWriter fw = new FileWriter(path);
@@ -744,10 +753,10 @@ public class calcul {
 			}
 			fw.close();
 		} catch (IOException e) {
-			System.out.println("Ğ´ÎÄ¼ş´íÎó !!");
+			System.out.println("å†™æ–‡ä»¶é”™è¯¯ !!");
 		}
 	}
-	public void load(String path) {				//¼ÓÔØÎÄ¼ş±äÁ¿
+	public void load(String path) {				//åŠ è½½æ–‡ä»¶å˜é‡
 		path = deal_path(pwd, path);
 		try {
 			FileReader fr = new FileReader(path);
@@ -758,9 +767,9 @@ public class calcul {
 			br.close();
 			fr.close();
 		} catch (FileNotFoundException e) {
-			System.out.println("¶ÁÎÄ¼ş´íÎó !!");
+			System.out.println("è¯»æ–‡ä»¶é”™è¯¯ !!");
 		} catch (IOException e) {
-			System.out.println("¶ÁÎÄ¼ş´íÎó !!");		
+			System.out.println("è¯»æ–‡ä»¶é”™è¯¯ !!");		
 		}
 	}
 }
