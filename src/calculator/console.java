@@ -12,7 +12,7 @@ public class console {
 		while( true ){
 			exp = sc.nextLine();
 			if( exp.equals("quit") ){
-				a.println("Thanks for use !!\n");
+				a.println("Thanks for using !!\n");
 				break;
 			}
 			if( exp.replaceAll(" ", "").length() == 0 ){

@@ -142,7 +142,7 @@ public class function {
 		case "avg":
 			bd1 = new BigDecimal(cal("sum", rd, varsum));
 			bd2 = new BigDecimal(varsum);
-			bd1 = bd1.divide(bd2);
+			bd1 = bd1.divide(bd2, 10, RoundingMode.DOWN);
 			break;
 		case "sumavg":
 			BigDecimal bavg = new BigDecimal( cal("avg",rd,varsum) );		

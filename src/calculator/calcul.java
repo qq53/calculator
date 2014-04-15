@@ -26,30 +26,34 @@ public class calcul {
 	private String pwd;										//	当前工作路径
 	private String operator2 = " ,(^%*/[";        //优化去掉多余的运算符
 	private String operator3 = ".0123456789"; //判断字符是否代表数字
+	private String separator;					//多平台下的路径分隔符
+	private String LF;							//多平台下的换行符
 	
 	private String deal_path(String base, String s){
-		s = s.replaceAll(" ", "").replaceAll("/s", " ");	//去多余空格 替换/s为空格
-		if( s.charAt(s.length()-1) != '\\' )	//末尾添加\
-			s += "\\";
-		if( s.indexOf(":") > 0 )
+		s = s.replaceAll(" ", "").replaceAll("/s", " ");	//判断字符是否代表数字
+		if( s.charAt(s.length()-1) != separator.charAt(0) )	//末尾添加分隔符
+			s += separator;
+		if( s.indexOf(":") > 0 || s.indexOf(0) == '/' )
 			if( isExist(s) )
 				return s;
 		String tmp = base;
-		while( s.indexOf("\\") > 0 ){
-			switch( s.substring(0, s.indexOf("\\")) ){
+		while( s.indexOf(separator) > 0 ){
+			switch( s.substring(0, s.indexOf(separator)) ){
 			case ".":
 				break;
 			case "..":
-				if( tmp.lastIndexOf("\\") > 0 )
-					tmp = tmp.substring(0, tmp.lastIndexOf("\\"));
+				if( tmp.lastIndexOf(separator) > 0 )
+					tmp = tmp.substring(0, tmp.lastIndexOf(separator));
+				else if( tmp.lastIndexOf(separator) == 0 )
+					tmp = tmp.substring(0, 1);
 				break;
 			default:
-				if( s.substring(0, s.indexOf("\\")).indexOf(".") >= 0 ) // 2个以上.不处理
+				if( s.substring(0, s.indexOf(separator)).indexOf(".") >= 0 ) // 2个以上.不处理
 					break;
-				tmp += "\\" + s.substring(0, s.indexOf("\\"));
+				tmp += separator + s.substring(0, s.indexOf(separator));
 				break;
 			}
-			s = s.substring(s.indexOf("\\")+1);
+			s = s.substring(s.indexOf(separator)+1);
 		}
 		return tmp;
 	}
@@ -61,15 +65,6 @@ public class calcul {
 		return false;
 	}
 	calcul(){
-		init();
-	}
-	public void println(String str){
-		System.out.print(PS1 + str);
-	}
-	public void init(){					//重新初始化环境
-		oprd = new Stack<String>();
-		optr = new Stack<String>();
-
 		trtable = new  HashMap<String, Integer>();		//规定运算优先级0最低
 		trtable.put("#", 0); 
 		trtable.put("+", 1);
@@ -104,45 +99,68 @@ public class calcul {
 		trtable.put("stdev", 3);
 		trtable.put("stdevp", 3);	
 		
-		func = new function();
+		func = new function();		
+		
+		if( System.getProperty("os.name").charAt(0) == 'W' ){
+			separator = "\\";
+			LF = "\r\n";
+		}
+		else{
+			separator = "/";
+			LF = "\n";
+		}
+		init();
+	}
+	public void println(String str){
+		System.out.print(PS1 + str);
+	}
+	public void init(){					//重新初始化环境
+		oprd = new Stack<String>();
+		optr = new Stack<String>();
+
 		ans = "0";
 		
-		pwd  = System.getProperty("user.dir");		//初始工作路径
-		PS1 = pwd.substring( pwd.lastIndexOf("\\") + 1 );
+		pwd  = System.getProperty("user.dir");		//重新初始化环境
+		PS1 = pwd.substring( pwd.lastIndexOf(separator) + 1 );
 		PS1 = "[ " + PS1 + " ] ";
 		
 		vartable = new  HashMap<String, String>();		//申请存放变量表
 		vartable.put("ans", ans);		
 	}
-	private boolean preprocess() {			//预处理 完成变量替换 或 命令
-		String tmp = exp.substring(0, exp.length() - 1 ).trim();
-		tmp = tmp.replaceAll(" {2,}", " ");	//2个以上空格换成1个
-		boolean ret = false;
+	private String vareplace(String tmp){
 		Iterator<Entry<String, String>> it;
 		Entry<String, String> entry;
+		int i, j, len;
 		
-		if( tmp.indexOf("=") != tmp.lastIndexOf("=") ){
-			System.out.println("=号超过2个 !!");
-			return true;
-		}
-		//变量替换
+		//防止越界
 		tmp = "     " + tmp + "     ";
-		int pos = tmp.lastIndexOf("=");
-		if( pos < 0 )
-			pos = 0;
-		it = vartable.entrySet().iterator();		//完成变量替换
+		it = vartable.entrySet().iterator();		//遍历变量表
 		while(it.hasNext()){
 			entry = (Entry<String, String>)it.next();
-			int i = tmp.indexOf(entry.getKey());
-			if( i > pos ){
-				int len  = entry.getKey().length();
-				int j = ( tmp.charAt(i) + tmp.charAt( i + len) )>>1;
+			for( i = tmp.indexOf(entry.getKey()); i > 0; i = tmp.indexOf(entry.getKey()) ){
+				len  = entry.getKey().length();
+				j = ( tmp.charAt(i) + tmp.charAt( i + len) )>>1;
 				if(  j < 'a' || j > 'z' )
 					tmp = tmp.substring(0, i) + entry.getValue() + tmp.substring(i+len);
 			}
 		} 
-		tmp = tmp.trim();		
-		exp = tmp + "#";		//替换后的
+		tmp = tmp.trim();		//还原加的空格
+		return tmp;	
+	}
+	
+	private boolean preprocess() {			//预处理 完成变量替换 或 命令
+		String tmp = exp.trim();
+		tmp = tmp.substring(0, tmp.length()-1);
+		tmp = tmp.replaceAll(" {2,}", " ");	//预处理 完成变量替换 或 命令
+		tmp = tmp.toLowerCase(); 		
+		boolean ret = false;
+		Iterator<Entry<String, String>> it;
+		Entry<String, String> entry;
+	
+		if( tmp.indexOf("=") != tmp.lastIndexOf("=") ){
+			System.out.println("=号超过2个 !!");
+			return true;
+		}
 		
 		if( tmp.indexOf("=") > 0 ){
 			tmp = tmp.replaceAll(" ", "");	//=号表达式 不需要空格
@@ -169,28 +187,27 @@ public class calcul {
 						f_print = false;
 					if( !f_print )
 						varexp = varexp.substring(0, varexp.length()-1 );
-					exp = varexp + "#";
+					exp = vareplace(varexp) + "#";
 					optimize();
 					if( iscorrect() ) {
 						varexp = cal();
 						vartable.put(var, varexp);
 						if( f_print )
-							System.out.println( var + " = " + vartable.get(var) );
+							System.out.println( var + " = " + varexp );
 					}else
 						return true;
 				}
 			}	
 		}
-		
 		if( tmp.length() >= 2 ){
 			switch( tmp.substring(0,2) ){
 			case "ls":
 				ret = true;
-				File f = new File(pwd + "\\");
+				File f = new File(pwd + separator);
 				File list[] = f.listFiles();
 				int i;
 				for(i = 0; i < list.length; ){
-					System.out.printf("%-15s ", list[i].getName());
+					System.out.printf("%-16s", list[i].getName());
 					if( ++i%4 == 0 )
 						System.out.print("\n");
 				}
@@ -200,7 +217,7 @@ public class calcul {
 			case "cd":
 				ret = true;
 				if( tmp.charAt(2) != ' ' && tmp.length() < 4 ){
-					System.out.println("cd参数错误!! ");
+					System.out.println("cd命令参数错误 !! ");
 					return true;
 				}
 				String s = tmp.substring(3);
@@ -210,16 +227,19 @@ public class calcul {
 					break;
 				}
 				pwd = tpwd;
-				if( pwd.lastIndexOf("\\") > 0 )
-					PS1 = pwd.substring( pwd.lastIndexOf("\\") + 1 );
-				else
+				if( pwd.lastIndexOf(separator) >= 0 && pwd.length() > 1 ){
+					PS1 = pwd.substring( pwd.lastIndexOf(separator) + 1 );
+					PS1 = "[ " + PS1 + " ] ";
+				}
+				else{
 					PS1 = pwd.substring(0, 1);
-				PS1 = "[ " + PS1 + " ] ";
+					PS1 = "[ " + PS1 + " ] ";
+				}
 				break;
 			case "rm":
 				ret = true;
 				if( tmp.charAt(2) != ' ' ){
-					System.out.println("需要参数 !!");
+					System.out.println("rm命令需要参数 !!");
 					return true;
 				}
 				String[] vararr = tmp.substring(3).split(" ");
@@ -231,7 +251,7 @@ public class calcul {
 						break;
 					}
 					if( df.isDirectory() || !df.isFile() ){
-						System.out.println("文件类型错误 !!");
+						System.out.println("目录不存在 !!");
 						break;
 					}
 					if( !df.delete() ){
@@ -242,12 +262,10 @@ public class calcul {
 				break;
 			}
 		}
-		
 		if( tmp.length() >= 7 && tmp.substring(0, 3).equals("ps1") ){		//因为已经转成小写了
 			PS1( tmp.substring( 5, tmp.length()-2 ) );
 			ret = true;
 		}
-			
 		if( tmp.length() >= 4 ){
 			switch(  tmp.substring(0, 4) ){
 			case "show":
@@ -274,7 +292,10 @@ public class calcul {
 				load(lpath);
 				break;
 			}
-		}
+		}		
+		if( !ret )
+			exp  = vareplace(tmp);
+		exp = exp + "#";
 		
 		return ret;
 	}
@@ -297,21 +318,25 @@ public class calcul {
 			return false;
 		}		
 		if( exp.matches("[^\\(]+,[^\\)]+") ){
-			System.out.println("逗号错误 !!");
+			System.out.println(",号错误 !!");
 			return false;
 		}	
 		if( exp.matches(".*[^\\)\\d]+[+-/%^\\*]+.*") ){
-			System.out.println("数不正确 !!");
+			System.out.println("操作数错误 !!");
 			return false;
 		}		
 		if( exp.matches(".*[+-/%^\\*]+[^a-z\\d\\(]+.*") ){
-			System.out.println("数不正确 !!");
+			System.out.println("操作数错误 !!");
+			return false;
+		}
+		if( exp.indexOf("\\") > 0 || exp.matches(".*[`~!@$&']+.*") ){
+			System.out.println("有非法字符 !!");
 			return false;
 		}		
 		Iterator<Entry<String, Integer>> it = trtable.entrySet().iterator();
 		String etmp = exp;
 		etmp = etmp.replaceAll("cuberoot", "");			//先替换ROOT导致错误 认为先替换cuberoot
-		while(it.hasNext()){											//替换所有支持的函数，如果还有字母即有错误
+		while(it.hasNext()){											//替换所有支持的函数，如果还有字母则有错
 			Entry<String, Integer> entry = (Entry<String, Integer>)it.next();
 			if( ((String)entry.getKey()).length() > 1 )
 				etmp = etmp.replaceAll((String)entry.getKey(), "");
@@ -320,7 +345,7 @@ public class calcul {
 			System.out.println("函数名错误 !!");
 			return false;
 		}
-		int checknumber = 0;		//括号数量匹配
+		int checknumber = 0;		//检测括号数量匹配
 		for(int i = 0; i < exp.lastIndexOf("#"); ++i) {
 			switch( exp.charAt(i) ){
 			case '(':
@@ -338,13 +363,13 @@ public class calcul {
 			}		
 		}
 		if( checknumber != 0 )	{
-			System.out.println("括号个数不合法 !!");
+			System.out.println("括号使用错误 !!");
 			return false;
 		}		
 		etmp = "     " + exp + "     ";
-		int cfunc = 0;	//用来跳过统计函数的,号
-		int pos1 = 0, pos2 = 0; //用来记录统计函数始末		
-		for(int i = 4; i < etmp.lastIndexOf("#"); ++i) {	//同时完成统计函数和参数变量检查
+		int cfunc = 0;	//用来跳过统计函数,号
+		int pos1 = 0, pos2 = 0; //用来记录统计函数始末
+		for(int i = 4; i < etmp.lastIndexOf("#"); ++i) {	//同时完成统计函数和参数变量检测
 			String tmp = etmp.substring(i, i+3);
 			if( cfunc !=0 ){
 				if( etmp.charAt(i) == '(' || etmp.charAt(i) == '[' ){
@@ -352,7 +377,7 @@ public class calcul {
 				}
 				else if( etmp.charAt(i) == ')' || etmp.charAt(i) == ']' ){
 					--cfunc;		
-					if( cfunc == 1 ){			//因为低下赋值为1
+					if( cfunc == 1 ){			//因为低下代码赋值为1
 						if( etmp.charAt(i-1) != ']' ){
 							System.out.println("统计函数需要向量参数 !!");
 							return false;
@@ -391,8 +416,7 @@ public class calcul {
 	void optimize() { 			//优化表达式
 		exp = exp.replaceAll(" " , ""); 	//去空格
 		exp = "     " + exp + "     ";	//防止越界
-		exp.toLowerCase(); 		//大写转小写
-		for(int i = 4; i < exp.lastIndexOf("#"); ++i ) {  //“.“前补0
+		for(int i = 5; i < exp.lastIndexOf("#"); ++i ) {  //.1 -> 0.1
 			if( exp.charAt(i+1) == '.' && operator3.indexOf(exp.substring(i, i+1)) < 0 ){
 				exp = exp.substring(0, i + 1) + "0" + exp.substring(i + 1);	
 				continue;
@@ -410,7 +434,7 @@ public class calcul {
 				exp = exp.substring(0, i+1) + "*" + exp.substring(i+1);
 						i += 3;
 			}
-			//	)(加*号
+			//	)( -> )*(
 			if(exp.charAt(i) == ')' && exp.charAt(i+1) == '(') {
 				exp = exp.substring(0, i+1) + "*" + exp.substring(i+1);
 				continue;
@@ -509,7 +533,7 @@ public class calcul {
 		if( preprocess() )
 			return null;
 		
-		optimize();
+		optimize();	
 		if( !iscorrect() ) 
 			return null;
 		
@@ -545,7 +569,7 @@ public class calcul {
 				break;
 			case '>':
 				ctop = optr.pop();
-				if (ctop.length() > 1) {	//处理普通运算符和函数		
+				if (ctop.length() > 1) {	//处理普通运算符和函数	
 					if( varsum > 2) {
 						int i = varsum;
 						while( i-- > 0 )
@@ -582,7 +606,7 @@ public class calcul {
 		ans = oprd.pop();
 		return ans;
 	}
-	private char compare(String top, String tr){							//比较运算符优先级
+	private char compare(String top, String tr){							//简单的除法判断
 		char c = top.charAt(0);
 		char c1 = tr.charAt(0);
 
@@ -635,7 +659,7 @@ public class calcul {
 		else
 			return i1 > i2?'>':'<';
 	}
-	private String cal(String tr, String rd1,  String rd2){		//计算双目运算符,简单的本类处理，复杂的交给function类
+	private String cal(String tr, String rd1,  String rd2){		//计算双目运算符,简单的本函数处理，复杂的交给function类
 		BigDecimal brd1 = new BigDecimal(rd1);
 		BigDecimal brd2 = new BigDecimal(rd2);		
 
@@ -715,7 +739,7 @@ public class calcul {
 			int i = 0;
 			String[] tmp = var.split(" ");
 			while(i < tmp.length){
-				fw.write( tmp[i] + " " + vartable.get(tmp[i]) + "\r\n" );
+				fw.write( tmp[i] + " " + vartable.get(tmp[i]) + LF );
 				++i;
 			}
 			fw.close();
