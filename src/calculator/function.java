@@ -21,15 +21,20 @@ public class function {
 			if( brd2.toString().indexOf(".") > 0){			
 				d1 = new Double(rd1);
 				d2 = new Double(rd2);	
-				if( d1 < 0 && (d2 - (double)d2.intValue()) <= 0.000001 ){
+				if( d1 < 0 ){
 					System.out.println("负数不能小数次方 !!");
 					return null;
 				}
 				d1 = Math.pow(d1, d2);
 				brd1 = new BigDecimal( d1.toString() );
 			}
+			else if( brd2.intValue() < 0){
+				BigDecimal one = new BigDecimal("1");
+				brd1 = brd1.pow( Math.abs(brd2.intValue()) );
+				brd1 = one.divide( brd1, 10, RoundingMode.DOWN );
+			}
 			else
-				brd1 = brd1.pow( brd2.intValue() );
+				brd1 = brd1.pow( brd2.intValue() );				
 			break;
 		case "mod":
 			brd1 = brd1.remainder(brd2);

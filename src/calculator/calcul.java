@@ -24,7 +24,7 @@ public class calcul {
 	private String basetr = "+-*/%^(),[]#";	//分割之前操作符/数
 	private function func;								//计算复杂函数
 	private String pwd;										//	当前工作路径
-	private String operator2 = ",(^%*/[";        //优化去掉多余的运算符
+	private String operator2 = " ,(^%*/[";        //优化去掉多余的运算符
 	private String operator3 = ".0123456789"; //判断字符是否代表数字
 	
 	private String deal_path(String base, String s){
@@ -444,7 +444,7 @@ public class calcul {
 				continue;
 			}	//负数换成0-
 			if(operator2.indexOf(exp.substring(i, i+1)) >= 0) {
-				if((exp.charAt(i+1) == '+' || exp.charAt(i+1) == '-') && operator3.indexOf(exp.substring(i+2, i+3)) >= 0) {
+				if((exp.charAt(i+1) == '+' || exp.charAt(i+1) == '-') && operator3.indexOf(exp.substring(i+2, i+3)) > 0) {
 					int k;
 					for(k = i+3; operator3.indexOf(exp.substring(k, k+1)) >= 0; k++);
 					exp = exp.substring(0, i+1) + "(0" + exp.substring(i+1, k) + ")" + exp.substring(k);
@@ -510,7 +510,6 @@ public class calcul {
 			return null;
 		
 		optimize();
-		System.out.println(exp);
 		if( !iscorrect() ) 
 			return null;
 		
@@ -658,7 +657,18 @@ public class calcul {
 				ans = brd1.remainder(brd2).toString();
 				break;
 			case "^":
-				ans = brd1.pow(brd2.intValue()).toString();
+				if( brd1.intValue() < 0 && rd2.indexOf(".") > 0 ){
+					System.out.println("负数不能有小数次方 !!");
+					return null;
+				}
+				if( brd2.intValue() < 0){
+					BigDecimal one = new BigDecimal("1");
+					brd1 = brd1.pow( Math.abs(brd2.intValue()) );
+					brd1 = one.divide( brd1, 10, RoundingMode.DOWN );
+				}
+				else
+					brd1 = brd1.pow( brd2.intValue() );				
+				ans = brd1.toString();
 				break;
 			}
 		}else 
