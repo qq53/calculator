@@ -16,7 +16,7 @@ import java.util.Stack;
 
 public class calcul {
 	private Stack<String> optr, oprd; 		//存放操作符,操作数
-	private String ans;								//默认结果存放每次结果
+	public String ans;								//默认结果存放每次结果
 	private Map<String, Integer> trtable;		//存运算符优先级，顺便可以判断是否支持
 	private String PS1;										//每次输出前的提示字符串
 	private Map<String, String> vartable;		//存运算符优先级，顺便可以判断是否支持
@@ -34,10 +34,11 @@ public class calcul {
 		s = s.replaceAll(" ", "").replaceAll("/s", " ");	//判断字符是否代表数字
 		if( s.charAt(s.length()-1) != separator.charAt(0) )	//末尾添加分隔符
 			s += separator;
-		if( s.indexOf(":") > 0 || s.indexOf(0) == '/' )
-			if( isExist(s) )
-				return s;
-		String tmp = base;
+		if( s.indexOf(":") > 0 )
+			return s.substring(0, s.length()-1);
+		if( s.charAt(0) == separator.charAt(0) )
+			return s;
+		String tmp = base;	
 		while( s.indexOf(separator) > 0 ){
 			switch( s.substring(0, s.indexOf(separator)) ){
 			case ".":
@@ -49,7 +50,7 @@ public class calcul {
 					tmp = tmp.substring(0, 1);
 				break;
 			default:
-				if( s.substring(0, s.indexOf(separator)).indexOf(".") >= 0 ) // 2个以上.不处理
+				if( s.substring(0, s.indexOf(separator)).matches(".*\\.{2,}.*") ) // 2个以上.不处理
 					break;
 				tmp += separator + s.substring(0, s.indexOf(separator));
 				break;
@@ -234,13 +235,14 @@ public class calcul {
 				}
 				String s = tmp.substring(3);
 				String tpwd = deal_path(pwd, s);
+				System.out.println(tpwd);			
 				if( !isExist(tpwd) ){
 					System.out.println("目录不存在 !!");
 					break;
 				}
 				pwd = tpwd;
 				if( !PS1_lock ){
-					if( pwd.lastIndexOf(separator) >= 0 && pwd.length() > 1 ){
+					if( !pwd.substring( pwd.lastIndexOf(separator)+1).equals("") ){
 						PS1 = pwd.substring( pwd.lastIndexOf(separator) + 1 );
 						PS1 = "[ " + PS1 + " ] ";
 					}
@@ -257,7 +259,7 @@ public class calcul {
 					return true;
 				}
 				String[] vararr = tmp.substring(3).split(" ");
-				for(i = 0; i < vararr.length; ++i){
+				for(i = 0; i < vararr.length; ++i){	
 					String dpath = deal_path(pwd, vararr[i]);
 					File df = new File(dpath);
 					if( !df.exists() ){
@@ -265,7 +267,7 @@ public class calcul {
 						break;
 					}
 					if( df.isDirectory() || !df.isFile() ){
-						System.out.println("目录不存在 !!");
+						System.out.println("不能删除目录 !!");
 						break;
 					}
 					if( !df.delete() ){
@@ -358,15 +360,17 @@ public class calcul {
 		}		
 		exp = exp.trim();
 		Iterator<Entry<String, Integer>> it = trtable.entrySet().iterator();
-		String etmp = exp;
-		etmp = etmp.replaceAll("cuberoot", "");			//先替换ROOT导致错误 认为先替换cuberoot
+		String etmp = exp;										//下面发现系统间有差异 WINDOWS不需要下面3个
+		etmp = etmp.replaceAll("cuberoot", "");			//先替换ROOT导致错误 应该先替换cuberoot
+		etmp = etmp.replaceAll("stdevp", "");			//先替换stdev导致错误 应该先替换stdevp
+		etmp = etmp.replaceAll("varp", "");			//先替换var导致错误 应该先替换varp
 		while(it.hasNext()){											//替换所有支持的函数，如果还有字母则有错
 			Entry<String, Integer> entry = (Entry<String, Integer>)it.next();
 			if( ((String)entry.getKey()).length() > 1 )
 				etmp = etmp.replaceAll((String)entry.getKey(), "");
 		}
 		if( etmp.matches(".*[a-zA-Z]+.*") ){
-			System.out.println("函数名错误 !!");
+			System.out.println("函数参数或者名错误 !!");
 			return false;
 		}
 		int checknumber = 0;		//检测括号数量匹配
@@ -412,8 +416,10 @@ public class calcul {
 				}
 			}
 			if( tmp.equals("avg") || tmp.equals("sum") || tmp.equals("var") || tmp.equals("std") ){
-				pos1 = i;
-				cfunc = 1;
+				if( pos1 == 0 )
+					pos1 = i;
+				if( cfunc == 0 )
+					cfunc = 1;
 				i += 2;
 			}
 			if( cfunc == 0 ){		//0才证明没在统计函数里
@@ -542,7 +548,7 @@ public class calcul {
 					}
 					else if(operator3.indexOf(exp.substring(i-1, i)) >= 0) {
 						int k;
-						for(k = i-1; operator3.indexOf(exp.substring(k-1, k)) > 0 && exp.charAt(k) != ' '; k--);
+						for(k = i-1; operator3.indexOf(exp.substring(k-1, k)) >= 0 && exp.charAt(k) != ' '; k--);
 						exp = exp.substring(0, k) + exp.substring(i+1, i+6) + exp.substring(k, i) + "," + exp.substring(i+6);
 					}
 				}
@@ -556,12 +562,14 @@ public class calcul {
 		exp = tmp + "#";
 		if( preprocess() )
 			return null;
-	
+		
 		optimize();			
 		if( !iscorrect() ) 
 			return null;
 		
-		return cal();
+		ans = cal();
+		vartable.put("ans", ans);
+		return ans;
 	}
 	
 	private String cal(){			//计算表达式返回值
@@ -705,18 +713,23 @@ public class calcul {
 				ans = brd1.remainder(brd2).toString();
 				break;
 			case "^":
-				if( brd1.intValue() < 0 && rd2.indexOf(".") > 0 ){
+				if( rd1.indexOf("-") >= 0 && rd2.indexOf(".") > 0 ){
 					System.out.println("负数不能有小数次方 !!");
 					return null;
 				}
-				if( brd2.intValue() < 0){
-					BigDecimal one = new BigDecimal("1");
-					brd1 = brd1.pow( Math.abs(brd2.intValue()) );
-					brd1 = one.divide( brd1, 10, RoundingMode.DOWN );
+				try{
+					if( brd2.intValue() < 0){
+						BigDecimal one = new BigDecimal("1");
+						brd1 = brd1.pow( Math.abs(brd2.intValue()) );
+						brd1 = one.divide( brd1, 10, RoundingMode.DOWN );
+					}
+					else
+						brd1 = brd1.pow( brd2.intValue() );			
+					ans = brd1.toString();
+				}catch(ArithmeticException e){
+					System.out.println("指数过大 !!");
+					ans = null;
 				}
-				else
-					brd1 = brd1.pow( brd2.intValue() );				
-				ans = brd1.toString();
 				break;
 			}
 		}else 
