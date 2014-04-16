@@ -127,11 +127,15 @@ public class calcul {
 		
 		vartable = new  HashMap<String, String>();		//申请存放变量表
 		vartable.put("ans", ans);		
+		Double tmp = new Double(Math.PI);
+		vartable.put("pi", tmp.toString());	
+		Double tmp1 = new Double(Math.E);
+		vartable.put("e", tmp1.toString());			
 	}
 	private String vareplace(String tmp){
 		Iterator<Entry<String, String>> it;
 		Entry<String, String> entry;
-		int i, j, len;
+		int i, len;
 		
 		//防止越界
 		tmp = "     " + tmp + "     ";
@@ -140,9 +144,15 @@ public class calcul {
 			entry = (Entry<String, String>)it.next();
 			for( i = tmp.indexOf(entry.getKey()); i > 0; i = tmp.indexOf(entry.getKey()) ){
 				len  = entry.getKey().length();
-				j = ( tmp.charAt(i) + tmp.charAt( i + len) )>>1;
-				if(  j < 'a' || j > 'z' )
+				if( ( (tmp.charAt(i-1) < 'a' || tmp.charAt(i-1) > 'z') && (tmp.charAt(i+len) < 'a' || tmp.charAt(i+len) > 'z') ) || 
+						tmp.substring(i+len, i+len+4).equals("root") )
 					tmp = tmp.substring(0, i) + entry.getValue() + tmp.substring(i+len);
+				else{
+					if( it.hasNext() )
+						entry = (Entry<String, String>)it.next();
+					else
+						break;
+				}
 			}
 		} 
 		tmp = tmp.trim();		//还原加的空格
@@ -188,6 +198,8 @@ public class calcul {
 					if( !f_print )
 						varexp = varexp.substring(0, varexp.length()-1 );
 					exp = vareplace(varexp) + "#";
+					if( exp.equals("null#") )
+						return true;
 					optimize();
 					if( iscorrect() ) {
 						varexp = cal();
@@ -303,12 +315,15 @@ public class calcul {
 		}		
 		if( !ret )
 			exp  = vareplace(tmp);
+		if( exp == null)
+			return true;
 		exp = exp + "#";
 		
 		return ret;
 	}
 
 	boolean iscorrect() {				//检测表达式
+		exp = " " + exp + " ";
 		if( exp.matches(".*\\.\\w+\\..*") ){
 			System.out.println(".号错误 !!");
 			return false;
@@ -322,7 +337,7 @@ public class calcul {
 			return false;
 		}
 		if( exp.matches(".*[a-zA-Z]+.*") && !exp.matches(".*[a-zA-Z]+\\(.*\\).*") ){
-			System.out.println("函数需要参数 !!");
+			System.out.println("函数参数或者名错误 !!");
 			return false;
 		}		
 		if( exp.matches("[^\\(]+,[^\\)]+") ){
@@ -341,6 +356,7 @@ public class calcul {
 			System.out.println("有非法字符 !!");
 			return false;
 		}		
+		exp = exp.trim();
 		Iterator<Entry<String, Integer>> it = trtable.entrySet().iterator();
 		String etmp = exp;
 		etmp = etmp.replaceAll("cuberoot", "");			//先替换ROOT导致错误 认为先替换cuberoot
@@ -377,7 +393,7 @@ public class calcul {
 		etmp = "     " + exp + "     ";
 		int cfunc = 0;	//用来跳过统计函数,号
 		int pos1 = 0, pos2 = 0; //用来记录统计函数始末
-		for(int i = 5; i < etmp.lastIndexOf("#"); ++i) {	//同时完成统计函数和参数变量检测
+		for(int i = 4; i < etmp.lastIndexOf("#"); ++i) {	//同时完成统计函数和参数变量检测
 			String tmp = etmp.substring(i, i+3);
 			if( cfunc !=0 ){
 				if( etmp.charAt(i) == '(' || etmp.charAt(i) == '[' ){
@@ -422,9 +438,10 @@ public class calcul {
 		return true;
 	}
 	void optimize() { 			//优化表达式
+		exp = exp.toLowerCase();
 		exp = exp.replaceAll(" " , ""); 	//去空格
 		exp = "     " + exp + "     ";	//防止越界
-		for(int i = 5; i < exp.lastIndexOf("#"); ++i ) {  //.1 -> 0.1
+		for(int i = 4; i < exp.lastIndexOf("#"); ++i ) {  //.1 -> 0.1
 			if( exp.charAt(i+1) == '.' && operator3.indexOf(exp.substring(i, i+1)) < 0 ){
 				exp = exp.substring(0, i + 1) + "0" + exp.substring(i + 1);	
 				continue;
@@ -537,11 +554,10 @@ public class calcul {
 	public String process(String tmp){		//处理表达式返回值
 		
 		exp = tmp + "#";
-		
 		if( preprocess() )
 			return null;
-		
-		optimize();	
+	
+		optimize();			
 		if( !iscorrect() ) 
 			return null;
 		

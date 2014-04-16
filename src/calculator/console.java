@@ -21,7 +21,7 @@ public class console {
 			}
 			result = a.process( exp );	
 			if( result != null )
-				a.println(exp + " = " + result + "\n");
+				a.println("结果 = " + result + "\n");
 			a.println("");
 		}
 		sc.close();
