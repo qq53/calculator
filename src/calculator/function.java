@@ -37,6 +37,10 @@ public class function {
 				brd1 = brd1.pow( brd2.intValue() );				
 			break;
 		case "mod":
+			if( brd2.doubleValue()  - 0 <= 0.00000001 ){
+				System.out.println("不能对0取余 !!");
+				return null;
+			}
 			brd1 = brd1.remainder(brd2);
 			break;
 		case "root":

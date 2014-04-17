@@ -354,7 +354,7 @@ public class calcul {
 			System.out.println("操作数错误 !!");
 			return false;
 		}
-		if( exp.indexOf("\\") > 0 || exp.matches(".*[`~!@$&']+.*") ){
+		if( exp.indexOf("\\") > 0 || exp.matches(".*[`~!@$&'{}|]+.*") ){
 			System.out.println("有非法字符 !!");
 			return false;
 		}		
@@ -364,6 +364,9 @@ public class calcul {
 		etmp = etmp.replaceAll("cuberoot", "");			//先替换ROOT导致错误 应该先替换cuberoot
 		etmp = etmp.replaceAll("stdevp", "");			//先替换stdev导致错误 应该先替换stdevp
 		etmp = etmp.replaceAll("varp", "");			//先替换var导致错误 应该先替换varp
+		etmp = etmp.replaceAll("arcsin", "");			//先替换sin导致错误 应该先替换arcsin
+		etmp = etmp.replaceAll("arccos", "");			//先替换cos导致错误 应该先替换arccos
+		etmp = etmp.replaceAll("arctan", "");			//先替换tan导致错误 应该先替换arctan
 		while(it.hasNext()){											//替换所有支持的函数，如果还有字母则有错
 			Entry<String, Integer> entry = (Entry<String, Integer>)it.next();
 			if( ((String)entry.getKey()).length() > 1 )
@@ -373,7 +376,8 @@ public class calcul {
 			System.out.println("函数参数或者名错误 !!");
 			return false;
 		}
-		int checknumber = 0;		//检测括号数量匹配
+		int checknumber = 0;		//检测小括号
+		int checknumber1 = 0; 	//检测中括号
 		for(int i = 0; i < exp.lastIndexOf("#"); ++i) {
 			switch( exp.charAt(i) ){
 			case '(':
@@ -383,51 +387,59 @@ public class calcul {
 				--checknumber;
 				break;
 			case '[':
-				++checknumber;
+				++checknumber1;
 				break;
 			case ']':
-				--checknumber;
+				--checknumber1;
 				break;
-			}		
+			}
+			if( checknumber < 0 || checknumber1 < 0 || checknumber < checknumber1 ){
+				System.out.println("括号匹配错误 !!");
+				return false;				
+			}
 		}
-		if( checknumber != 0 )	{
-			System.out.println("括号使用错误 !!");
+		if( checknumber + checknumber1 != 0 )	{
+			System.out.println("括号匹配错误 !!");
 			return false;
 		}		
 		etmp = "     " + exp + "     ";
-		int cfunc = 0;	//用来跳过统计函数,号
-		int pos1 = 0, pos2 = 0; //用来记录统计函数始末
+		boolean iscount = false;		//判断是否是统计函数，用来跳过其,号
+		int j;
 		for(int i = 4; i < etmp.lastIndexOf("#"); ++i) {	//同时完成统计函数和参数变量检测
 			String tmp = etmp.substring(i, i+3);
-			if( cfunc !=0 ){
-				if( etmp.charAt(i) == '(' || etmp.charAt(i) == '[' ){
-					++cfunc;
-				}
-				else if( etmp.charAt(i) == ')' || etmp.charAt(i) == ']' ){
-					--cfunc;		
-					if( cfunc == 1 ){			//因为低下代码赋值为1
-						if( etmp.charAt(i-1) != ']' ){
+			if( iscount ){
+				switch( etmp.charAt(i) ){
+				case '(':
+				case '[':
+					++checknumber;
+					break;
+				case ')':
+				case ']':
+					if ( --checknumber == 0 ){
+						iscount = false;
+						j = i;
+						while( etmp.charAt(j) == ')' )
+							--j;
+						if( etmp.charAt(j) != ']' ){
 							System.out.println("统计函数需要向量参数 !!");
 							return false;
 						}
-						--cfunc;
-						pos2 = i;
 					}
+					break;
 				}
 			}
 			if( tmp.equals("avg") || tmp.equals("sum") || tmp.equals("var") || tmp.equals("std") ){
-				if( pos1 == 0 )
-					pos1 = i;
-				if( cfunc == 0 )
-					cfunc = 1;
+				iscount = true;
 				i += 2;
-			}
-			if( cfunc == 0 ){		//0才证明没在统计函数里
-				if( pos1+pos2 != 0 ){
-					etmp = etmp.substring(0, pos1) + etmp.substring(pos2+1);
-					i = pos1;
-					pos1 = pos2 = 0;
+				j = i + 1;
+				while( (etmp.charAt(j) >='a' && etmp.charAt(j) <= 'z') || etmp.charAt(j) == '(' )
+					++j;
+				if( etmp.charAt(j) != '[' ){
+					System.out.println("统计函数需要向量参数 !!");
+					return false;
 				}
+			}
+			if( !iscount ){
 				if( tmp.equals("mod") || tmp.equals("pow") || (tmp.equals("roo") && etmp.charAt(i-1) != 'e' ) ){
 					++checknumber;
 					i += 2;
@@ -452,9 +464,34 @@ public class calcul {
 				exp = exp.substring(0, i + 1) + "0" + exp.substring(i + 1);	
 				continue;
 			}	//	mod -> %
-			if(exp.substring(i, i + 3).equals("mod") && exp.charAt(i + 3) != '(') {	
-				exp = exp.substring(0, i) + "%" + exp.substring(i+3);
-				continue;
+			if( exp.substring(i, i + 3).equals("mod") ) {	//分别两种情况  直接跟数字和有括号，右括号要判断是不是函数mod
+				if( exp.charAt(i + 3) != '(' ){
+					exp = exp.substring(0, i) + "%" + exp.substring(i+3);
+					continue;
+				}else{
+					int j = i+4;
+					int sum = 1;
+					boolean notfunc = true;
+					while( sum > 0 && j < exp.length() ){
+						switch( exp.charAt(j) ){
+						case '(':
+							++sum;
+							break;
+						case ')':
+							--sum;
+							break;
+						case ',':
+							if( sum == 1 )
+								notfunc = false;
+							break;
+						}
+						++j;
+					}				
+					if( notfunc ){
+						exp = exp.substring(0, i) + "%" + exp.substring(i+3);
+						continue;
+					}
+				}
 			}	//	log10 -> lg
 			if(exp.substring(i, i + 5).equals("log10")) {
 				exp = exp.substring(0, i) + "lg" + exp.substring(i+5);
@@ -463,7 +500,7 @@ public class calcul {
 			//	1(2) -> 1*(2)
 			if(exp.charAt(i+1) == '(' && operator3.indexOf(exp.substring(i, i+1)) > 0) {
 				exp = exp.substring(0, i+1) + "*" + exp.substring(i+1);
-						i += 3;
+				continue;
 			}
 			//	)( -> )*(
 			if(exp.charAt(i) == ')' && exp.charAt(i+1) == '(') {
@@ -474,12 +511,13 @@ public class calcul {
 				exp = exp.substring(0, i+1) + "*" + exp.substring(i+1);
 				continue;
 			}	//	)sin(1) -> )*sin(1)
-			if(exp.charAt(i) == ')' && exp.charAt(i+1) >= 'a' && exp.charAt(i+1) <= 'z') {
-				exp = exp.substring(0, i+1) + "*" + exp.substring(i+1);
+			if(exp.charAt(i-1) == ')' && exp.charAt(i) >= 'a' && exp.charAt(i) <= 'z') {
+				exp = exp.substring(0, i) + "*" + exp.substring(i);
 				continue;
 			} 	//	2sin -> 2*sin
-			if(operator3.indexOf(exp.substring(i, i+1)) > 0 && (exp.charAt(i+1) >= 'a' && exp.charAt(i+1) <= 'z')) {				
-				exp = exp.substring(0, i+1) + "*" + exp.substring(i+1);
+			if( (exp.charAt(i) >= 'a' && exp.charAt(i) <= 'z') && operator3.indexOf(exp.substring(i-1, i)) > 0 ) {				
+				exp = exp.substring(0, i) + "*" + exp.substring(i);
+				--i;
 				continue;
 			}	//++ -> +
 			if( exp.substring(i,i+2).equals("++") ) {
@@ -499,7 +537,7 @@ public class calcul {
 				continue;
 			}	//负数换成0-
 			if(operator2.indexOf(exp.substring(i, i+1)) >= 0) {
-				if((exp.charAt(i+1) == '+' || exp.charAt(i+1) == '-') && operator3.indexOf(exp.substring(i+2, i+3)) > 0) {
+				if((exp.charAt(i+1) == '+' || exp.charAt(i+1) == '-') && operator3.indexOf(exp.substring(i+2, i+3)) >= 0) {
 					int k;
 					for(k = i+3; operator3.indexOf(exp.substring(k, k+1)) >= 0; k++);
 					exp = exp.substring(0, i+1) + "(0" + exp.substring(i+1, k) + ")" + exp.substring(k);
@@ -563,10 +601,10 @@ public class calcul {
 		if( preprocess() )
 			return null;
 		
-		optimize();			
+		optimize();		
 		if( !iscorrect() ) 
 			return null;
-		
+
 		ans = cal();
 		vartable.put("ans", ans);
 		return ans;
@@ -710,6 +748,10 @@ public class calcul {
 				ans = brd1.divide(brd2, 10, RoundingMode.DOWN).toString();
 				break;
 			case "%":
+				if( brd2.doubleValue() - 0 <= 0.00000001 ){
+					System.out.println("不能对0取余 !!");
+					return null;
+				}
 				ans = brd1.remainder(brd2).toString();
 				break;
 			case "^":
