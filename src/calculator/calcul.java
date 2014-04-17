@@ -234,8 +234,7 @@ public class calcul {
 					return true;
 				}
 				String s = tmp.substring(3);
-				String tpwd = deal_path(pwd, s);
-				System.out.println(tpwd);			
+				String tpwd = deal_path(pwd, s);		
 				if( !isExist(tpwd) ){
 					System.out.println("目录不存在 !!");
 					break;
