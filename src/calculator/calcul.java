@@ -145,8 +145,7 @@ public class calcul {
 			entry = (Entry<String, String>)it.next();
 			for( i = tmp.indexOf(entry.getKey()); i > 0; i = tmp.indexOf(entry.getKey()) ){
 				len  = entry.getKey().length();
-				if( ( (tmp.charAt(i-1) < 'a' || tmp.charAt(i-1) > 'z') && (tmp.charAt(i+len) < 'a' || tmp.charAt(i+len) > 'z') ) || 
-						tmp.substring(i+len, i+len+4).equals("root") )
+				if( ( (tmp.charAt(i-1) < 'a' || tmp.charAt(i-1) > 'z') && (tmp.charAt(i+len) < 'a' || tmp.charAt(i+len) > 'z') ) )
 					tmp = tmp.substring(0, i) + entry.getValue() + tmp.substring(i+len);
 				else{
 					if( it.hasNext() )
@@ -191,7 +190,7 @@ public class calcul {
 			if( var.equals("") || varexp.equals("") )
 				System.out.println("=号使用错误");
 			else{
-				if( trtable.get(var) != null || var.equals("ans") || var.matches(".*\\d+.*") )
+				if( trtable.get(var) != null || var.equals("ans") || var.matches(".*[^a-z]+.*") )
 					System.out.println("变量名不可用 !!");
 				else{
 					if( varexp.indexOf(";") > 0 )
@@ -355,6 +354,10 @@ public class calcul {
 		}
 		if( exp.indexOf("\\") > 0 || exp.matches(".*[`~!@$&'{}|]+.*") ){
 			System.out.println("有非法字符 !!");
+			return false;
+		}		
+		if( exp.matches(".*[^=]*;.*") ){
+			System.out.println(";使用错误 !!");
 			return false;
 		}		
 		exp = exp.trim();
